@@ -47,7 +47,7 @@ CREATE TYPE "InsightType" AS ENUM ('summary', 'key_points', 'tone', 'audience', 
 
 -- CreateTable
 CREATE TABLE "users" (
-    "id" UUID NOT NULL DEFAULT extensions.gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "email" VARCHAR(320) NOT NULL,
     "name" VARCHAR(200),
     "avatarUrl" TEXT,
@@ -63,7 +63,7 @@ CREATE TABLE "users" (
 
 -- CreateTable
 CREATE TABLE "workspaces" (
-    "id" UUID NOT NULL DEFAULT extensions.gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "name" VARCHAR(200) NOT NULL,
     "slug" VARCHAR(100) NOT NULL,
     "logoUrl" TEXT,
@@ -75,7 +75,7 @@ CREATE TABLE "workspaces" (
 
 -- CreateTable
 CREATE TABLE "memberships" (
-    "id" UUID NOT NULL DEFAULT extensions.gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "userId" UUID NOT NULL,
     "workspaceId" UUID NOT NULL,
     "role" "MemberRole" NOT NULL DEFAULT 'viewer',
@@ -87,7 +87,7 @@ CREATE TABLE "memberships" (
 
 -- CreateTable
 CREATE TABLE "brand_kits" (
-    "id" UUID NOT NULL DEFAULT extensions.gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "workspaceId" UUID NOT NULL,
     "name" VARCHAR(200) NOT NULL,
     "primaryColor" VARCHAR(7),
@@ -106,7 +106,7 @@ CREATE TABLE "brand_kits" (
 
 -- CreateTable
 CREATE TABLE "file_assets" (
-    "id" UUID NOT NULL DEFAULT extensions.gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "workspaceId" UUID NOT NULL,
     "projectId" UUID,
     "uploadedByUserId" UUID NOT NULL,
@@ -124,7 +124,7 @@ CREATE TABLE "file_assets" (
 
 -- CreateTable
 CREATE TABLE "projects" (
-    "id" UUID NOT NULL DEFAULT extensions.gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "workspaceId" UUID NOT NULL,
     "createdByUserId" UUID NOT NULL,
     "name" VARCHAR(300) NOT NULL,
@@ -138,7 +138,7 @@ CREATE TABLE "projects" (
 
 -- CreateTable
 CREATE TABLE "parsed_artifacts" (
-    "id" UUID NOT NULL DEFAULT extensions.gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "projectId" UUID NOT NULL,
     "fileAssetId" UUID NOT NULL,
     "rawText" TEXT,
@@ -154,7 +154,7 @@ CREATE TABLE "parsed_artifacts" (
 
 -- CreateTable
 CREATE TABLE "insights" (
-    "id" UUID NOT NULL DEFAULT extensions.gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "projectId" UUID NOT NULL,
     "type" "InsightType" NOT NULL,
     "content" TEXT NOT NULL,
@@ -167,7 +167,7 @@ CREATE TABLE "insights" (
 
 -- CreateTable
 CREATE TABLE "processing_jobs" (
-    "id" UUID NOT NULL DEFAULT extensions.gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "workspaceId" UUID NOT NULL,
     "projectId" UUID,
     "deckId" UUID,
@@ -188,7 +188,7 @@ CREATE TABLE "processing_jobs" (
 
 -- CreateTable
 CREATE TABLE "decks" (
-    "id" UUID NOT NULL DEFAULT extensions.gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "projectId" UUID NOT NULL,
     "workspaceId" UUID NOT NULL,
     "createdByUserId" UUID NOT NULL,
@@ -207,7 +207,7 @@ CREATE TABLE "decks" (
 
 -- CreateTable
 CREATE TABLE "slides" (
-    "id" UUID NOT NULL DEFAULT extensions.gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "deckId" UUID NOT NULL,
     "position" INTEGER NOT NULL,
     "layout" "SlideLayout" NOT NULL DEFAULT 'content',
@@ -224,7 +224,7 @@ CREATE TABLE "slides" (
 
 -- CreateTable
 CREATE TABLE "comments" (
-    "id" UUID NOT NULL DEFAULT extensions.gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "deckId" UUID NOT NULL,
     "slideId" UUID,
     "authorUserId" UUID NOT NULL,
@@ -239,7 +239,7 @@ CREATE TABLE "comments" (
 
 -- CreateTable
 CREATE TABLE "export_jobs" (
-    "id" UUID NOT NULL DEFAULT extensions.gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "deckId" UUID NOT NULL,
     "requestedByUserId" UUID NOT NULL,
     "format" "ExportFormat" NOT NULL,
@@ -254,7 +254,7 @@ CREATE TABLE "export_jobs" (
 
 -- CreateTable
 CREATE TABLE "plans" (
-    "id" UUID NOT NULL DEFAULT extensions.gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "tier" "PlanTier" NOT NULL,
     "name" VARCHAR(100) NOT NULL,
     "description" TEXT,
@@ -280,7 +280,7 @@ CREATE TABLE "plans" (
 
 -- CreateTable
 CREATE TABLE "subscriptions" (
-    "id" UUID NOT NULL DEFAULT extensions.gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "workspaceId" UUID NOT NULL,
     "planId" UUID NOT NULL,
     "status" "SubscriptionStatus" NOT NULL DEFAULT 'trialing',
@@ -298,7 +298,7 @@ CREATE TABLE "subscriptions" (
 
 -- CreateTable
 CREATE TABLE "briefings" (
-    "id" UUID NOT NULL DEFAULT extensions.gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "deckId" UUID NOT NULL,
     "audience" TEXT,
     "objective" TEXT,
@@ -312,7 +312,7 @@ CREATE TABLE "briefings" (
 
 -- CreateTable
 CREATE TABLE "outlines" (
-    "id" UUID NOT NULL DEFAULT extensions.gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "briefingId" UUID NOT NULL,
     "slidesJson" JSONB NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -322,7 +322,7 @@ CREATE TABLE "outlines" (
 
 -- CreateTable
 CREATE TABLE "audit_logs" (
-    "id" UUID NOT NULL DEFAULT extensions.gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "workspaceId" UUID NOT NULL,
     "actorUserId" UUID,
     "action" "AuditAction" NOT NULL,
@@ -339,7 +339,7 @@ CREATE TABLE "audit_logs" (
 
 -- CreateTable
 CREATE TABLE "usage_events" (
-    "id" UUID NOT NULL DEFAULT extensions.gen_random_uuid(),
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "workspaceId" UUID NOT NULL,
     "userId" UUID,
     "eventType" VARCHAR(100) NOT NULL,

@@ -121,7 +121,7 @@ enum InsightType {
 // ─── Identity & Access ───────────────────────────────────────────────────────
 
 model User {
-  id            String    @id @default(dbgenerated("extensions.gen_random_uuid()")) @db.Uuid
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   email         String    @unique @db.VarChar(320)
   name          String?   @db.VarChar(200)
   avatarUrl     String?
@@ -145,7 +145,7 @@ model User {
 }
 
 model Workspace {
-  id        String   @id @default(dbgenerated("extensions.gen_random_uuid()")) @db.Uuid
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name      String   @db.VarChar(200)
   slug      String   @unique @db.VarChar(100)
   logoUrl   String?
@@ -167,7 +167,7 @@ model Workspace {
 }
 
 model Membership {
-  id              String     @id @default(dbgenerated("extensions.gen_random_uuid()")) @db.Uuid
+  id              String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId          String     @db.Uuid
   workspaceId     String     @db.Uuid
   role            MemberRole @default(viewer)
@@ -185,7 +185,7 @@ model Membership {
 // ─── Branding ─────────────────────────────────────────────────────────────────
 
 model BrandKit {
-  id               String   @id @default(dbgenerated("extensions.gen_random_uuid()")) @db.Uuid
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   workspaceId      String   @db.Uuid
   name             String   @db.VarChar(200)
   primaryColor     String?  @db.VarChar(7)
@@ -209,7 +209,7 @@ model BrandKit {
 // ─── Files & Storage ──────────────────────────────────────────────────────────
 
 model FileAsset {
-  id                 String        @id @default(dbgenerated("extensions.gen_random_uuid()")) @db.Uuid
+  id                 String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   workspaceId        String        @db.Uuid
   projectId          String?       @db.Uuid
   uploadedByUserId   String        @db.Uuid
@@ -236,7 +236,7 @@ model FileAsset {
 // ─── Projects & AI Processing ─────────────────────────────────────────────────
 
 model Project {
-  id                String        @id @default(dbgenerated("extensions.gen_random_uuid()")) @db.Uuid
+  id                String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   workspaceId       String        @db.Uuid
   createdByUserId   String        @db.Uuid
   name              String        @db.VarChar(300)
@@ -259,7 +259,7 @@ model Project {
 }
 
 model ParsedArtifact {
-  id                String    @id @default(dbgenerated("extensions.gen_random_uuid()")) @db.Uuid
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   projectId         String    @db.Uuid
   fileAssetId       String    @db.Uuid
   rawText           String?   @db.Text
@@ -279,7 +279,7 @@ model ParsedArtifact {
 }
 
 model Insight {
-  id            String      @id @default(dbgenerated("extensions.gen_random_uuid()")) @db.Uuid
+  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   projectId     String      @db.Uuid
   type          InsightType
   content       String      @db.Text
@@ -296,7 +296,7 @@ model Insight {
 // ─── Jobs ─────────────────────────────────────────────────────────────────────
 
 model ProcessingJob {
-  id          String    @id @default(dbgenerated("extensions.gen_random_uuid()")) @db.Uuid
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   workspaceId String    @db.Uuid
   projectId   String?   @db.Uuid
   deckId      String?   @db.Uuid
@@ -324,7 +324,7 @@ model ProcessingJob {
 // ─── Decks & Slides ───────────────────────────────────────────────────────────
 
 model Deck {
-  id                String     @id @default(dbgenerated("extensions.gen_random_uuid()")) @db.Uuid
+  id                String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   projectId         String     @db.Uuid
   workspaceId       String     @db.Uuid
   createdByUserId   String     @db.Uuid
@@ -352,7 +352,7 @@ model Deck {
 }
 
 model Slide {
-  id           String      @id @default(dbgenerated("extensions.gen_random_uuid()")) @db.Uuid
+  id           String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   deckId       String      @db.Uuid
   position     Int
   layout       SlideLayout @default(content)
@@ -373,7 +373,7 @@ model Slide {
 }
 
 model Comment {
-  id                 String    @id @default(dbgenerated("extensions.gen_random_uuid()")) @db.Uuid
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   deckId             String    @db.Uuid
   slideId            String?   @db.Uuid
   authorUserId       String    @db.Uuid
@@ -395,7 +395,7 @@ model Comment {
 // ─── Export ───────────────────────────────────────────────────────────────────
 
 model ExportJob {
-  id                  String       @id @default(dbgenerated("extensions.gen_random_uuid()")) @db.Uuid
+  id                  String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   deckId              String       @db.Uuid
   requestedByUserId   String       @db.Uuid
   format              ExportFormat
@@ -416,7 +416,7 @@ model ExportJob {
 // ─── Subscriptions & Plans ────────────────────────────────────────────────────
 
 model Plan {
-  id                          String   @id @default(dbgenerated("extensions.gen_random_uuid()")) @db.Uuid
+  id                          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   tier                        PlanTier @unique
   name                        String   @db.VarChar(100)
   description                 String?  @db.Text
@@ -443,7 +443,7 @@ model Plan {
 }
 
 model Subscription {
-  id                     String             @id @default(dbgenerated("extensions.gen_random_uuid()")) @db.Uuid
+  id                     String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   workspaceId            String             @unique @db.Uuid
   planId                 String             @db.Uuid
   status                 SubscriptionStatus @default(trialing)
@@ -467,7 +467,7 @@ model Subscription {
 // ─── Briefing & Outline ───────────────────────────────────────────────────────
 
 model Briefing {
-  id          String   @id @default(dbgenerated("extensions.gen_random_uuid()")) @db.Uuid
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   deckId      String   @db.Uuid
   audience    String?  @db.Text
   objective   String?  @db.Text
@@ -484,7 +484,7 @@ model Briefing {
 }
 
 model Outline {
-  id          String   @id @default(dbgenerated("extensions.gen_random_uuid()")) @db.Uuid
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   briefingId  String   @db.Uuid
   slidesJson  Json
   createdAt   DateTime @default(now())
@@ -498,7 +498,7 @@ model Outline {
 // ─── Observability ────────────────────────────────────────────────────────────
 
 model AuditLog {
-  id          String      @id @default(dbgenerated("extensions.gen_random_uuid()")) @db.Uuid
+  id          String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   workspaceId String      @db.Uuid
   actorUserId String?     @db.Uuid
   action      AuditAction
@@ -520,7 +520,7 @@ model AuditLog {
 }
 
 model UsageEvent {
-  id          String   @id @default(dbgenerated("extensions.gen_random_uuid()")) @db.Uuid
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   workspaceId String   @db.Uuid
   userId      String?  @db.Uuid
   eventType   String   @db.VarChar(100)
