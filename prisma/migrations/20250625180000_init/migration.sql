@@ -1,3 +1,5 @@
+CREATE SCHEMA IF NOT EXISTS extensions;
+
 -- CreateExtension
 CREATE EXTENSION IF NOT EXISTS "pg_trgm" WITH SCHEMA "extensions";
 
