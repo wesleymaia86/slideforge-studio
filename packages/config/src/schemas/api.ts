@@ -7,7 +7,7 @@ export const apiEnvSchema = commonEnvSchema.extend({
   API_URL: z.string().url().describe("Public API base URL"),
   WEB_URL: z.string().url().describe("Frontend origin for CORS"),
   JWT_SECRET: z.string().min(32).describe("JWT signing secret (>=32 chars)"),
-  JWT_EXPIRY: z.string().default("15m").describe("Access token expiry"),
+  JWT_EXPIRY: z.string().default("30d").describe("Access token expiry"),
   JWT_REFRESH_SECRET: z.string().min(32).describe("Refresh token signing secret"),
   JWT_REFRESH_EXPIRY: z.string().default("30d").describe("Refresh token expiry"),
   WORKER_API_KEY: z.string().min(32).describe("Shared secret for worker→API internal callbacks"),

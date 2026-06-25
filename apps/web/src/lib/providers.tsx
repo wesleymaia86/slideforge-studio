@@ -2,16 +2,25 @@
 
 import * as React from 'react'
 import dynamic from 'next/dynamic'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { SessionProvider } from 'next-auth/react'
+import { QueryClient, QueryClientProvider, QueryCache, MutationCache } from '@tanstack/react-query'
+import { SessionProvider, signOut } from 'next-auth/react'
+import { ApiError } from '@/lib/api/client'
 
 const ReactQueryDevtools = dynamic(
   () => import('@tanstack/react-query-devtools').then((mod) => mod.ReactQueryDevtools),
   { ssr: false },
 )
 
+function handleGlobalError(error: unknown) {
+  if (error instanceof ApiError && error.status === 401) {
+    signOut({ redirectTo: '/login' })
+  }
+}
+
 function makeQueryClient() {
   return new QueryClient({
+    queryCache: new QueryCache({ onError: handleGlobalError }),
+    mutationCache: new MutationCache({ onError: handleGlobalError }),
     defaultOptions: {
       queries: {
         staleTime: 60 * 1000,

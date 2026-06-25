@@ -2,18 +2,35 @@
 
 import { useState } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, ArrowRight, Layers } from 'lucide-react'
+import { BASE_URL } from '@/lib/api/client'
+
+type Mode = 'login' | 'register'
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('demo@slideforge.io')
-  const [password, setPassword] = useState('demo')
+  const [mode, setMode] = useState<Mode>('login')
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [showPass, setShowPass] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const router = useRouter()
+  const [success, setSuccess] = useState('')
 
-  async function handleSubmit(e: React.FormEvent) {
+  function resetForm() {
+    setName('')
+    setEmail('')
+    setPassword('')
+    setError('')
+    setSuccess('')
+  }
+
+  function switchMode(m: Mode) {
+    resetForm()
+    setMode(m)
+  }
+
+  async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError('')
@@ -26,19 +43,53 @@ export default function LoginPage() {
       })
     } catch (err: unknown) {
       setLoading(false)
-      // NextAuth throws a redirect — let it happen
-      const isRedirect = err && typeof err === 'object' && 'digest' in err && String((err as {digest?: string}).digest).includes('NEXT_REDIRECT')
+      const isRedirect =
+        err &&
+        typeof err === 'object' &&
+        'digest' in err &&
+        String((err as { digest?: string }).digest).includes('NEXT_REDIRECT')
       if (!isRedirect) {
-        setError('Credenciais inválidas. Tente demo@slideforge.io / demo')
+        setError('E-mail ou senha inválidos.')
       }
     }
   }
+
+  async function handleRegister(e: React.FormEvent) {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+    setSuccess('')
+
+    try {
+      const res = await fetch(`${BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, name: name.trim() || undefined }),
+      })
+
+      if (!res.ok) {
+        const data = (await res.json()) as { message?: string | string[] }
+        const msg = Array.isArray(data.message) ? data.message[0] : (data.message ?? 'Erro ao criar conta.')
+        setError(String(msg))
+        setLoading(false)
+        return
+      }
+
+      setSuccess('Conta criada! Entrando…')
+      // Auto-login after register
+      await signIn('credentials', { email, password, redirectTo: '/dashboard' })
+    } catch {
+      setError('Não foi possível conectar ao servidor.')
+      setLoading(false)
+    }
+  }
+
+  const isLogin = mode === 'login'
 
   return (
     <div className="min-h-screen bg-bg flex">
       {/* Left — branding panel */}
       <div className="hidden lg:flex flex-col justify-between w-[480px] bg-surface border-r border-border p-12 relative overflow-hidden shrink-0">
-        {/* Ambient glow */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-amber-900/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
@@ -60,16 +111,14 @@ export default function LoginPage() {
             <span className="gradient-text-amber italic">molda</span> sua história
           </h1>
           <p className="text-text-muted text-sm leading-relaxed max-w-sm">
-            Transforme conteúdo bruto em apresentações impactantes. Análise com IA, 
+            Transforme conteúdo bruto em apresentações impactantes. Análise com IA,
             roteiros inteligentes e decks prontos para produção — em minutos.
           </p>
         </div>
 
-        {/* Slide filmstrip preview */}
         <div className="relative z-10">
           <p className="text-xs text-text-faint mb-3 uppercase tracking-widest">Projetos Recentes</p>
           <div className="relative">
-            {/* Filmstrip sprockets */}
             <div className="h-2 bg-surface-2 border-t border-b border-border flex items-center px-2 gap-2 mb-1">
               {Array.from({ length: 12 }).map((_, i) => (
                 <div key={i} className="w-2 h-1 rounded-sm bg-border shrink-0" />
@@ -117,7 +166,7 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Right — login form */}
+      {/* Right — form panel */}
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-[360px]">
           {/* Mobile logo */}
@@ -128,10 +177,30 @@ export default function LoginPage() {
             <span className="font-display text-base text-text">SlideForge Studio</span>
           </div>
 
-          <h2 className="font-display text-2xl text-text mb-1.5">Bem-vindo de volta</h2>
-          <p className="text-text-muted text-sm mb-8">Entre no seu workspace</p>
+          <h2 className="font-display text-2xl text-text mb-1.5">
+            {isLogin ? 'Bem-vindo de volta' : 'Criar sua conta'}
+          </h2>
+          <p className="text-text-muted text-sm mb-8">
+            {isLogin ? 'Entre no seu workspace' : 'Preencha os dados para começar'}
+          </p>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={isLogin ? handleLogin : handleRegister} className="space-y-4">
+            {!isLogin && (
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-text-muted tracking-wide" htmlFor="name">
+                  Nome <span className="text-text-faint">(opcional)</span>
+                </label>
+                <input
+                  id="name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Seu nome"
+                  className="w-full h-10 bg-surface-2 border border-border rounded-[10px] px-3 text-sm text-text placeholder:text-text-faint focus:outline-none focus:border-accent/50 focus:ring-2 focus:ring-accent/10 transition-colors"
+                />
+              </div>
+            )}
+
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-text-muted tracking-wide" htmlFor="email">
                 E-mail
@@ -149,7 +218,7 @@ export default function LoginPage() {
 
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-text-muted tracking-wide" htmlFor="password">
-                Senha
+                Senha {!isLogin && <span className="text-text-faint">(mín. 8 caracteres)</span>}
               </label>
               <div className="relative">
                 <input
@@ -158,6 +227,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  minLength={isLogin ? undefined : 8}
                   placeholder="••••••••"
                   className="w-full h-10 bg-surface-2 border border-border rounded-[10px] px-3 pr-10 text-sm text-text placeholder:text-text-faint focus:outline-none focus:border-accent/50 focus:ring-2 focus:ring-accent/10 transition-colors"
                 />
@@ -176,6 +246,11 @@ export default function LoginPage() {
                 {error}
               </div>
             )}
+            {success && (
+              <div className="px-3 py-2.5 rounded-lg bg-success/10 border border-success/25 text-xs text-success">
+                {success}
+              </div>
+            )}
 
             <button
               type="submit"
@@ -189,7 +264,7 @@ export default function LoginPage() {
                 </svg>
               ) : (
                 <>
-                  Entrar
+                  {isLogin ? 'Entrar' : 'Criar conta'}
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -198,7 +273,14 @@ export default function LoginPage() {
 
           <div className="mt-6 pt-6 border-t border-border">
             <p className="text-xs text-text-faint text-center">
-              Credenciais demo: <span className="text-text-muted font-mono">demo@slideforge.io</span> / <span className="text-text-muted font-mono">demo</span>
+              {isLogin ? 'Não tem conta?' : 'Já tem conta?'}{' '}
+              <button
+                type="button"
+                onClick={() => switchMode(isLogin ? 'register' : 'login')}
+                className="text-accent hover:text-accent-light transition-colors underline underline-offset-2"
+              >
+                {isLogin ? 'Criar conta' : 'Fazer login'}
+              </button>
             </p>
           </div>
         </div>
