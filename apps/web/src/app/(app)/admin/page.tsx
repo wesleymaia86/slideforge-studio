@@ -6,6 +6,7 @@ import { ShieldCheck, Users, FolderKanban, Building2, Activity } from 'lucide-re
 import { TopBar } from '@/components/layout/TopBar'
 import { useAdminStats, useAdminUsers, useAdminWorkspaces } from '@/lib/api/hooks'
 import { Badge, Skeleton } from '@slideforge/ui'
+import { t } from '@/lib/i18n'
 
 function StatCard({ icon, label, value, className = '' }: {
   icon: React.ReactNode; label: string; value: string | number; className?: string
@@ -43,10 +44,10 @@ export default function AdminPage() {
         <div className="mb-8">
           <div className="flex items-center gap-2.5 mb-2">
             <ShieldCheck className="w-5 h-5 text-accent" />
-            <h1 className="font-display text-2xl text-text">Admin Console</h1>
+            <h1 className="font-display text-2xl text-text">{t('admin.title')}</h1>
             <Badge variant="accent">{session?.user?.role}</Badge>
           </div>
-          <p className="text-text-muted text-sm">Platform administration and oversight.</p>
+          <p className="text-text-muted text-sm">{t('admin.subtitle')}</p>
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -59,26 +60,26 @@ export default function AdminPage() {
             </>
           ) : (
             <>
-              <StatCard icon={<Users className="w-5 h-5" />} label="Total Users" value={stats?.users ?? 0} />
-              <StatCard icon={<Building2 className="w-5 h-5" />} label="Workspaces" value={stats?.workspaces ?? 0} />
-              <StatCard icon={<FolderKanban className="w-5 h-5" />} label="File Assets" value={stats?.fileAssets ?? 0} />
-              <StatCard icon={<Activity className="w-5 h-5" />} label="Processing Jobs" value={stats?.processingJobs ?? 0} />
+              <StatCard icon={<Users className="w-5 h-5" />} label={t('admin.totalUsers')} value={stats?.users ?? 0} />
+              <StatCard icon={<Building2 className="w-5 h-5" />} label={t('admin.workspaces')} value={stats?.workspaces ?? 0} />
+              <StatCard icon={<FolderKanban className="w-5 h-5" />} label={t('admin.fileAssets')} value={stats?.fileAssets ?? 0} />
+              <StatCard icon={<Activity className="w-5 h-5" />} label={t('admin.processingJobs')} value={stats?.processingJobs ?? 0} />
             </>
           )}
         </div>
 
         <div className="mb-8">
-          <h2 className="text-sm font-semibold text-text mb-3">Users</h2>
+          <h2 className="text-sm font-semibold text-text mb-3">{t('admin.users')}</h2>
           <div className="bg-surface rounded-xl border border-border overflow-hidden">
             <div className="grid grid-cols-[1fr_1fr_100px] gap-4 px-4 py-2.5 border-b border-border bg-surface-2 text-[10px] font-semibold uppercase tracking-wider text-text-faint">
-              <span>Name</span>
-              <span>Email</span>
-              <span>Role</span>
+              <span>{t('admin.name')}</span>
+              <span>{t('admin.email')}</span>
+              <span>{t('admin.role')}</span>
             </div>
             {usersLoading ? (
               <div className="p-4"><Skeleton className="h-8" /></div>
             ) : users.length === 0 ? (
-              <div className="p-6 text-sm text-text-muted text-center">No users found</div>
+              <div className="p-6 text-sm text-text-muted text-center">{t('admin.noUsers')}</div>
             ) : (
               users.map((user, i) => (
                 <div
@@ -99,14 +100,14 @@ export default function AdminPage() {
         </div>
 
         <div>
-          <h2 className="text-sm font-semibold text-text mb-3">Workspaces ({workspaces.length})</h2>
+          <h2 className="text-sm font-semibold text-text mb-3">{t('admin.workspaceList')} ({workspaces.length})</h2>
           <div className="grid sm:grid-cols-2 gap-3">
             {workspaces.slice(0, 6).map((ws) => (
               <div key={ws.id} className="bg-surface rounded-xl border border-border p-4">
                 <p className="text-sm font-medium text-text">{ws.name}</p>
                 <p className="text-xs text-text-faint font-mono mt-1">{ws.slug}</p>
                 <p className="text-xs text-text-muted mt-2">
-                  {ws._count?.projects ?? 0} projects · {ws._count?.members ?? 0} members
+                  {ws._count?.projects ?? 0} {t('common.projects')} · {ws._count?.members ?? 0} {t('common.members')}
                 </p>
               </div>
             ))}

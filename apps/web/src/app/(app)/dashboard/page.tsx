@@ -6,6 +6,7 @@ import { Plus, TrendingUp, FolderKanban, Cpu, BarChart3, ArrowRight } from 'luci
 import { TopBar } from '@/components/layout/TopBar'
 import { useProjects, useAllJobs } from '@/lib/api/hooks'
 import { Button, Skeleton, EmptyState } from '@slideforge/ui'
+import { t } from '@/lib/i18n'
 import type { Project } from '@/lib/api/types'
 
 function StatusDot({ status }: { status: Project['status'] }) {
@@ -44,7 +45,7 @@ export default function DashboardPage() {
   const displayProjects = projects ?? []
   const activeJobs = (jobs ?? []).filter((j) => j.status !== 'completed')
 
-  const firstName = session?.user?.name?.split(' ')[0] ?? 'there'
+  const firstName = session?.user?.name?.split(' ')[0] ?? ''
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Bom dia' : hour < 17 ? 'Boa tarde' : 'Boa noite'
 
@@ -61,7 +62,7 @@ export default function DashboardPage() {
       <div className="flex-1 overflow-y-auto px-6 py-6">
         <div className="mb-8">
           <h1 className="font-display text-3xl text-text mb-1">
-            {greeting}, <span className="gradient-text-amber">{firstName}</span>
+            {greeting}{firstName ? ', ' : ''}<span className="gradient-text-amber">{firstName}</span>
           </h1>
           <p className="text-text-muted text-sm">Veja o que está acontecendo no seu workspace hoje.</p>
         </div>
@@ -136,7 +137,7 @@ export default function DashboardPage() {
                     <p className="text-sm font-medium text-text truncate">{project.name}</p>
                     <p className="text-xs text-text-faint mt-0.5 flex items-center gap-1.5">
                       <StatusDot status={project.status} />
-                      <span className="capitalize">{project.status}</span>
+                      <span>{t(`status.${project.status}`) || project.status}</span>
                       <span className="text-border mx-1">·</span>
                       <span>{project.slideCount} slide{project.slideCount !== 1 ? 's' : ''}</span>
                     </p>
@@ -158,7 +159,7 @@ export default function DashboardPage() {
                 <div key={job.id} className="bg-surface rounded-xl border border-border p-4 space-y-2.5">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <p className="text-xs font-medium text-text capitalize">{job.type}</p>
+                      <p className="text-xs font-medium text-text">{t(`jobs.${job.type}`) || job.type}</p>
                       <p className="text-[11px] text-text-muted mt-0.5 leading-relaxed">{job.message}</p>
                     </div>
                     <span
@@ -168,7 +169,7 @@ export default function DashboardPage() {
                           : 'bg-surface-2 text-text-faint'
                       }`}
                     >
-                      {job.status}
+                      {t(`status.${job.status}`) || job.status}
                     </span>
                   </div>
                   {job.status === 'running' && (
