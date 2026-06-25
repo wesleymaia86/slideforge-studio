@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "outDir": "dist",
+    "rootDir": "src",
+    "baseUrl": ".",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "paths": {
+      "@slideforge/config": ["../../packages/config/src"],
+      "@slideforge/types": ["../../packages/types/src"],
+      "@slideforge/db": ["../../packages/db/src"],
+      "@slideforge/ai": ["../../packages/ai/src"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "test"]
+}

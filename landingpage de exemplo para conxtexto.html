@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SlideForge Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root,[data-theme="light"]{
+      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+      --space-1: .25rem; --space-2: .5rem; --space-3: .75rem; --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem; --space-12: 3rem; --space-16: 4rem;
+      --color-bg:#f7f6f2; --color-surface:#f9f8f5; --color-surface-2:#fbfbf9; --color-surface-offset:#f3f0ec; --color-border:#d4d1ca; --color-divider:#dcd9d5;
+      --color-text:#28251d; --color-text-muted:#676560; --color-text-faint:#9d9a94; --color-text-inverse:#f9f8f4;
+      --color-primary:#01696f; --color-primary-hover:#0c4e54; --color-blue:#006494; --color-success:#437a22; --color-warning:#964219; --color-error:#a12c7b; --color-purple:#7a39bb;
+      --radius-sm:.5rem; --radius-md:.75rem; --radius-lg:1rem; --radius-xl:1.25rem; --radius-full:9999px;
+      --shadow-sm:0 1px 2px rgb(0 0 0 / .05); --shadow-md:0 8px 30px rgb(0 0 0 / .08); --shadow-lg:0 16px 48px rgb(0 0 0 / .12);
+      --font-body:'Inter',sans-serif; --font-display:'Manrope',sans-serif;
+    }
+    [data-theme="dark"]{
+      --color-bg:#111315; --color-surface:#171a1d; --color-surface-2:#1d2126; --color-surface-offset:#20252b; --color-border:#2f363d; --color-divider:#262c33;
+      --color-text:#edf2f7; --color-text-muted:#a2acb8; --color-text-faint:#748090; --color-text-inverse:#111315;
+      --color-primary:#55b2bb; --color-primary-hover:#7dc8cf; --color-blue:#76a9ff; --color-success:#74c365; --color-warning:#d69557; --color-error:#d56ab0; --color-purple:#b48cff;
+      --shadow-sm:0 1px 2px rgb(0 0 0 / .25); --shadow-md:0 10px 30px rgb(0 0 0 / .35); --shadow-lg:0 18px 56px rgb(0 0 0 / .45);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;scroll-behavior:smooth}
+    body{font-family:var(--font-body);font-size:var(--text-base);background:radial-gradient(circle at top right, rgba(85,178,187,.12), transparent 24%), radial-gradient(circle at 20% 20%, rgba(180,140,255,.10), transparent 22%), var(--color-bg);color:var(--color-text);overflow:hidden}
+    button,input,textarea,select{font:inherit;color:inherit}
+    a{text-decoration:none;color:inherit}
+    .app{display:grid;grid-template-columns:290px 1fr;height:100dvh}
+    .sidebar{background:color-mix(in oklab, var(--color-surface) 92%, transparent);border-right:1px solid var(--color-border);padding:var(--space-6);overflow:auto;backdrop-filter:blur(16px)}
+    .brand{display:flex;align-items:center;gap:var(--space-3);margin-bottom:var(--space-8)}
+    .logo{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,var(--color-primary),var(--color-blue));display:grid;place-items:center;box-shadow:var(--shadow-md)}
+    .logo svg{width:24px;height:24px}
+    .brand h1{font-family:var(--font-display);font-size:1.1rem;font-weight:800}
+    .brand p{font-size:var(--text-xs);color:var(--color-text-muted)}
+    .nav-group{margin-bottom:var(--space-6)}
+    .nav-title{font-size:var(--text-xs);text-transform:uppercase;letter-spacing:.12em;color:var(--color-text-faint);margin-bottom:var(--space-3)}
+    .nav-item{display:flex;align-items:center;gap:var(--space-3);padding:.8rem .9rem;border-radius:14px;color:var(--color-text-muted);margin-bottom:.35rem;transition:.18s ease;background:transparent;border:1px solid transparent}
+    .nav-item.active,.nav-item:hover{background:var(--color-surface-2);color:var(--color-text);border-color:color-mix(in oklab, var(--color-primary) 20%, var(--color-border));transform:translateX(2px)}
+    .nav-item .dot{width:9px;height:9px;border-radius:999px;background:currentColor;opacity:.7}
+    .workspace{display:grid;grid-template-rows:auto 1fr;min-width:0}
+    .topbar{display:flex;align-items:center;justify-content:space-between;padding:var(--space-5) var(--space-6);border-bottom:1px solid var(--color-border);background:color-mix(in oklab, var(--color-surface) 82%, transparent);backdrop-filter:blur(14px)}
+    .topbar .left h2{font-family:var(--font-display);font-size:var(--text-lg)}
+    .topbar .left p{font-size:var(--text-sm);color:var(--color-text-muted);margin-top:.2rem}
+    .top-actions{display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap}
+    .btn{display:inline-flex;align-items:center;gap:.55rem;padding:.8rem 1rem;border-radius:14px;border:1px solid var(--color-border);background:var(--color-surface);transition:.18s ease;box-shadow:var(--shadow-sm);font-size:var(--text-sm);font-weight:600}
+    .btn:hover{transform:translateY(-1px);box-shadow:var(--shadow-md)}
+    .btn-primary{background:linear-gradient(135deg,var(--color-primary),color-mix(in oklab,var(--color-blue) 70%, var(--color-primary)));color:white;border-color:transparent}
+    .btn-ghost{background:transparent}
+    .main{overflow:auto;padding:var(--space-6)}
+    .hero{display:grid;grid-template-columns:1.25fr .9fr;gap:var(--space-6);margin-bottom:var(--space-6)}
+    .panel{background:linear-gradient(180deg, color-mix(in oklab, var(--color-surface) 92%, transparent), var(--color-surface));border:1px solid var(--color-border);border-radius:22px;box-shadow:var(--shadow-md)}
+    .hero-card{padding:var(--space-8);position:relative;overflow:hidden}
+    .hero-card::after{content:"";position:absolute;inset:auto -8% -30% auto;width:260px;height:260px;background:radial-gradient(circle, rgba(85,178,187,.24), transparent 70%);pointer-events:none}
+    .eyebrow{display:inline-flex;align-items:center;gap:.5rem;padding:.45rem .75rem;border-radius:999px;background:color-mix(in oklab,var(--color-primary) 10%, var(--color-surface-2));color:var(--color-primary);font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+    .hero-card h3{font-family:var(--font-display);font-size:clamp(2rem, 3vw, 3rem);line-height:1.04;max-width:12ch;margin:var(--space-4) 0}
+    .hero-card p{max-width:62ch;color:var(--color-text-muted)}
+    .hero-actions{display:flex;gap:var(--space-3);margin-top:var(--space-6);flex-wrap:wrap}
+    .hero-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--space-4);padding:var(--space-5)}
+    .metric{padding:var(--space-4);border-radius:18px;background:var(--color-surface-2);border:1px solid color-mix(in oklab,var(--color-border) 90%, transparent)}
+    .metric .label{font-size:var(--text-xs);text-transform:uppercase;letter-spacing:.08em;color:var(--color-text-faint)}
+    .metric .value{font-size:1.8rem;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.03em;margin:.35rem 0}
+    .metric .sub{font-size:var(--text-sm);color:var(--color-text-muted)}
+    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-5);margin-bottom:var(--space-6)}
+    .section{margin-bottom:var(--space-6)}
+    .section h3{font-family:var(--font-display);font-size:var(--text-lg);margin-bottom:var(--space-4)}
+    .section p.section-intro{color:var(--color-text-muted);margin-bottom:var(--space-4)}
+    .stack{display:grid;gap:var(--space-5)}
+    .module-card{padding:var(--space-5)}
+    .module-card h4{font-size:1.05rem;margin-bottom:.45rem}
+    .module-card p{font-size:var(--text-sm);color:var(--color-text-muted);margin-bottom:var(--space-4)}
+    .chip-row,.bullet-row{display:flex;flex-wrap:wrap;gap:.55rem}
+    .chip{padding:.45rem .7rem;border-radius:999px;background:var(--color-surface-2);border:1px solid var(--color-border);font-size:var(--text-xs);color:var(--color-text-muted)}
+    .bullet-list{display:grid;gap:.75rem}
+    .bullet{display:flex;gap:.75rem;align-items:flex-start;padding:.95rem 1rem;border-radius:16px;background:var(--color-surface-2);border:1px solid var(--color-border)}
+    .bullet .mark{width:10px;height:10px;border-radius:999px;background:var(--color-primary);margin-top:.45rem;flex:none}
+    .two-col{display:grid;grid-template-columns:1.1fr .9fr;gap:var(--space-5)}
+    .flow{padding:var(--space-5)}
+    .flow-steps{display:grid;gap:var(--space-3);counter-reset:step}
+    .step{display:grid;grid-template-columns:auto 1fr;gap:var(--space-3);padding:1rem;border-radius:16px;background:var(--color-surface-2);border:1px solid var(--color-border)}
+    .step::before{counter-increment:step;content:counter(step);width:32px;height:32px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,var(--color-primary),var(--color-blue));color:white;font-weight:800}
+    .step strong{display:block;margin-bottom:.2rem}
+    .kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-4)}
+    .kpi{padding:1rem;border-radius:18px;background:var(--color-surface-2);border:1px solid var(--color-border)}
+    .kpi small{display:block;color:var(--color-text-faint);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.35rem}
+    .kpi span{font-size:1.45rem;font-weight:800;font-variant-numeric:tabular-nums}
+    .footer-note{padding:var(--space-4) var(--space-5);font-size:var(--text-sm);color:var(--color-text-muted);border-top:1px solid var(--color-border)}
+    .mock-window{padding:var(--space-5)}
+    .toolbar{display:flex;gap:.6rem;align-items:center;margin-bottom:var(--space-4)}
+    .toolbar .ball{width:10px;height:10px;border-radius:999px;background:var(--color-text-faint);opacity:.55}
+    .canvas{display:grid;grid-template-columns:260px 1fr;gap:var(--space-4);min-height:420px}
+    .rail,.editor,.sidepanel{border-radius:18px;background:var(--color-surface-2);border:1px solid var(--color-border)}
+    .rail{padding:var(--space-4);display:grid;gap:.75rem;align-content:start}
+    .thumb{padding:.85rem;border-radius:14px;background:linear-gradient(135deg, rgba(85,178,187,.10), rgba(118,169,255,.08));border:1px solid color-mix(in oklab, var(--color-primary) 18%, var(--color-border));font-size:var(--text-sm)}
+    .editor-wrap{display:grid;grid-template-columns:1fr 260px;gap:var(--space-4)}
+    .editor{padding:var(--space-4);display:grid;place-items:center;min-height:420px;position:relative;overflow:hidden}
+    .slide-preview{width:min(100%, 720px);aspect-ratio:16/9;border-radius:24px;background:linear-gradient(135deg,#0f172a,#0c2731 52%,#092135);padding:2rem;box-shadow:0 20px 60px rgba(0,0,0,.35);color:#eff6ff;position:relative;overflow:hidden}
+    .slide-preview::after{content:"";position:absolute;inset:auto -20% -20% auto;width:280px;height:280px;background:radial-gradient(circle, rgba(85,178,187,.28), transparent 70%)}
+    .slide-preview small{display:inline-block;letter-spacing:.1em;text-transform:uppercase;color:#9fd7dd;margin-bottom:.8rem}
+    .slide-preview h4{font:800 clamp(1.8rem,2.6vw,3rem)/1.02 var(--font-display);max-width:10ch;margin-bottom:.9rem}
+    .slide-preview p{max-width:38ch;color:#d0d9e4}
+    .preview-row{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-top:1.2rem}
+    .preview-card{border-radius:16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);padding:.85rem}
+    .sidepanel{padding:var(--space-4);display:grid;gap:var(--space-3);align-content:start}
+    .field{display:grid;gap:.45rem}
+    .field label{font-size:var(--text-xs);text-transform:uppercase;letter-spacing:.08em;color:var(--color-text-faint)}
+    .input{padding:.85rem .95rem;border-radius:14px;border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-text)}
+    .mini{font-size:var(--text-xs);color:var(--color-text-muted)}
+    .status-table{width:100%;border-collapse:collapse}
+    .status-table td,.status-table th{padding:.95rem;border-bottom:1px solid var(--color-divider);text-align:left;vertical-align:top;font-size:var(--text-sm)}
+    .status-table th{color:var(--color-text-faint);font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:var(--text-xs)}
+    .badge{display:inline-flex;align-items:center;padding:.35rem .6rem;border-radius:999px;font-size:var(--text-xs);font-weight:700}
+    .ok{background:color-mix(in oklab,var(--color-success) 20%, transparent);color:var(--color-success)}
+    .warn{background:color-mix(in oklab,var(--color-warning) 18%, transparent);color:var(--color-warning)}
+    .info{background:color-mix(in oklab,var(--color-blue) 16%, transparent);color:var(--color-blue)}
+    .danger{background:color-mix(in oklab,var(--color-error) 18%, transparent);color:var(--color-error)}
+    .floating-toggle{border-radius:999px}
+    @media (max-width: 1180px){.hero,.two-col,.canvas,.editor-wrap,.grid-3,.kpi-strip{grid-template-columns:1fr}.app{grid-template-columns:84px 1fr}.sidebar{padding:var(--space-4)}.brand div:not(.logo){display:none}.nav-item span:last-child,.nav-title{display:none}.nav-item{justify-content:center}.hero-card h3{max-width:16ch}}
+    @media (max-width: 780px){body{overflow:auto}.app{grid-template-columns:1fr;height:auto}.sidebar{display:none}.workspace{grid-template-rows:auto auto}.topbar{position:sticky;top:0;z-index:10}.main{padding:var(--space-4)}.hero-card{padding:var(--space-5)}.slide-preview{padding:1.25rem}.preview-row{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo" aria-label="SlideForge logo">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M5 5H19V9L12 14L5 9V5Z" fill="white" opacity=".95"/>
+            <path d="M7 11L12 15L17 11V19H7V11Z" fill="white" opacity=".7"/>
+          </svg>
+        </div>
+        <div>
+          <h1>SlideForge Studio</h1>
+          <p>AI Presentation OS</p>
+        </div>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-title">Produto</div>
+        <a class="nav-item active" href="#overview"><span class="dot"></span><span>Visão geral</span></a>
+        <a class="nav-item" href="#modules"><span class="dot"></span><span>Módulos</span></a>
+        <a class="nav-item" href="#pipeline"><span class="dot"></span><span>Pipeline</span></a>
+        <a class="nav-item" href="#stack"><span class="dot"></span><span>Stack</span></a>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-title">Operação</div>
+        <a class="nav-item" href="#security"><span class="dot"></span><span>Login e segurança</span></a>
+        <a class="nav-item" href="#admin"><span class="dot"></span><span>Admin / billing</span></a>
+        <a class="nav-item" href="#roadmap"><span class="dot"></span><span>Roadmap</span></a>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-title">Capacidades</div>
+        <div class="chip-row">
+          <span class="chip">Upload pesado</span>
+          <span class="chip">OCR</span>
+          <span class="chip">RAG</span>
+          <span class="chip">Insights</span>
+          <span class="chip">Chart engine</span>
+          <span class="chip">Theme engine</span>
+          <span class="chip">PPTX/PDF</span>
+        </div>
+      </div>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <div class="left">
+          <h2>Protótipo de produto completo</h2>
+          <p>Arquitetura funcional, módulos, fluxos, segurança, stack e interface para um SaaS de geração profissional de apresentações.</p>
+        </div>
+        <div class="top-actions">
+          <button class="btn btn-ghost floating-toggle" data-theme-toggle aria-label="Alternar tema">◐</button>
+          <button class="btn">Mapa de módulos</button>
+          <button class="btn btn-primary">Criar workspace</button>
+        </div>
+      </header>
+
+      <main class="main">
+        <section class="hero" id="overview">
+          <article class="panel hero-card">
+            <span class="eyebrow">SaaS de alto desempenho</span>
+            <h3>Entende o assunto, analisa arquivos pesados e monta slides profissionais ponta a ponta.</h3>
+            <p>O sistema foi desenhado como uma esteira completa: ingestão de dados, interpretação semântica, extração de insights, planejamento narrativo, geração de gráficos, composição visual, revisão colaborativa e exportação para PPTX, PDF e HTML. A experiência prioriza fluidez, baixa latência percebida, edição assistida e governança corporativa.</p>
+            <div class="hero-actions">
+              <button class="btn btn-primary">Novo projeto</button>
+              <button class="btn">Importar planilhas e documentos</button>
+              <button class="btn">Gerar deck executivo</button>
+            </div>
+          </article>
+
+          <aside class="panel hero-grid">
+            <div class="metric">
+              <div class="label">Entradas suportadas</div>
+              <div class="value">XLSX · CSV · PDF · DOCX</div>
+              <div class="sub">Também imagens, links, bases SQL e conectores corporativos.</div>
+            </div>
+            <div class="metric">
+              <div class="label">Motores centrais</div>
+              <div class="value">RAG + ETL + Layout</div>
+              <div class="sub">Pipeline híbrido com agentes especializados e renderização determinística.</div>
+            </div>
+            <div class="metric">
+              <div class="label">Saídas</div>
+              <div class="value">PPTX · PDF · HTML</div>
+              <div class="sub">Slides editáveis, com histórico, comentários e versionamento.</div>
+            </div>
+            <div class="metric">
+              <div class="label">Diferencial</div>
+              <div class="value">Narrativa + Design</div>
+              <div class="sub">Não só resume dados; cria storyline, visual e apresentação final.</div>
+            </div>
+          </aside>
+        </section>
+
+        <section class="section" id="modules">
+          <h3>Módulos obrigatórios</h3>
+          <p class="section-intro">Além do gerador de slides em si, o produto precisa de camadas de ingestão, inteligência, segurança, colaboração, governança, observabilidade e monetização.</p>
+          <div class="grid-3">
+            <article class="panel module-card">
+              <h4>1. Workspace e projetos</h4>
+              <p>Organiza empresas, times, clientes, apresentações, arquivos, pastas, templates e histórico de execuções.</p>
+              <div class="bullet-list">
+                <div class="bullet"><span class="mark"></span><div>Projeto por cliente, campanha, aula, board meeting ou squad.</div></div>
+                <div class="bullet"><span class="mark"></span><div>Versionamento de deck, restauração e comparação entre versões.</div></div>
+                <div class="bullet"><span class="mark"></span><div>Biblioteca de marca, fontes, cores, logos e guidelines.</div></div>
+              </div>
+            </article>
+            <article class="panel module-card">
+              <h4>2. Ingestão e processamento</h4>
+              <p>Recebe uploads grandes e heterogêneos, quebra em jobs, faz parsing, OCR, limpeza e indexação.</p>
+              <div class="bullet-list">
+                <div class="bullet"><span class="mark"></span><div>Upload multipart/resumable para arquivos grandes.</div></div>
+                <div class="bullet"><span class="mark"></span><div>Parsing por tipo: planilha, contrato, relatório, tabela, screenshot.</div></div>
+                <div class="bullet"><span class="mark"></span><div>Fila assíncrona com feedback de progresso por etapa.</div></div>
+              </div>
+            </article>
+            <article class="panel module-card">
+              <h4>3. Cérebro analítico</h4>
+              <p>Converte dados crus em contexto, métricas, anomalias, correlações, oportunidades e riscos.</p>
+              <div class="bullet-list">
+                <div class="bullet"><span class="mark"></span><div>Perfilador estatístico, sumarização e detecção de outliers.</div></div>
+                <div class="bullet"><span class="mark"></span><div>Motor de perguntas orientadas por objetivo da apresentação.</div></div>
+                <div class="bullet"><span class="mark"></span><div>Explicações, evidências e rastreabilidade da origem do insight.</div></div>
+              </div>
+            </article>
+          </div>
+
+          <div class="grid-3">
+            <article class="panel module-card">
+              <h4>4. Storyline e estrutura</h4>
+              <p>Transforma os insights em narrativa: objetivo, tese, seções, títulos, bullets, takeaways e CTA.</p>
+              <div class="chip-row">
+                <span class="chip">Modo board</span><span class="chip">Modo aula</span><span class="chip">Modo comercial</span><span class="chip">Modo relatório</span><span class="chip">Modo investidor</span>
+              </div>
+            </article>
+            <article class="panel module-card">
+              <h4>5. Motor gráfico e layout</h4>
+              <p>Escolhe template, aplica design system, monta grids, hierarquia tipográfica, charts e consistência visual.</p>
+              <div class="chip-row">
+                <span class="chip">Theme tokens</span><span class="chip">Auto-layout</span><span class="chip">Smart charts</span><span class="chip">Brand kit</span><span class="chip">Exporter</span>
+              </div>
+            </article>
+            <article class="panel module-card">
+              <h4>6. Revisão colaborativa</h4>
+              <p>Permite comentários, aprovação, tarefas, edição por slide e trilha de auditoria.</p>
+              <div class="chip-row">
+                <span class="chip">Comentários</span><span class="chip">Aprovação</span><span class="chip">Diff</span><span class="chip">Papéis</span><span class="chip">Logs</span>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="section" id="pipeline">
+          <h3>Pipeline de execução</h3>
+          <div class="two-col">
+            <article class="panel flow">
+              <div class="flow-steps">
+                <div class="step"><div><strong>1. Briefing</strong> Objetivo, público, idioma, tom, duração, formato e template base.</div></div>
+                <div class="step"><div><strong>2. Ingestão</strong> Upload de documentos, planilhas, URLs, conectores e dados históricos.</div></div>
+                <div class="step"><div><strong>3. Normalização</strong> OCR, limpeza, tipagem, schema inference, chunking e indexação vetorial.</div></div>
+                <div class="step"><div><strong>4. Análise</strong> KPIs, tendências, segmentações, exceções, comparativos e hipóteses.</div></div>
+                <div class="step"><div><strong>5. Story builder</strong> Agenda, mensagens-chave, títulos, bullets e ordem ideal dos slides.</div></div>
+                <div class="step"><div><strong>6. Render</strong> Gráficos, layouts, composição de cada slide, revisão e exportação final.</div></div>
+              </div>
+            </article>
+            <article class="panel mock-window">
+              <div class="toolbar"><span class="ball"></span><span class="ball"></span><span class="ball"></span><span class="mini">Editor visual do deck</span></div>
+              <div class="canvas">
+                <div class="rail">
+                  <div class="thumb">01 · Capa</div>
+                  <div class="thumb">02 · Contexto</div>
+                  <div class="thumb">03 · Principais achados</div>
+                  <div class="thumb">04 · Análise financeira</div>
+                  <div class="thumb">05 · Plano de ação</div>
+                  <div class="thumb">06 · Próximos passos</div>
+                </div>
+                <div class="editor-wrap">
+                  <div class="editor">
+                    <div class="slide-preview">
+                      <small>Quarterly Review</small>
+                      <h4>Receita cresceu, mas margem pede correção operacional.</h4>
+                      <p>O motor de insights seleciona a tese central, explica as evidências e sugere o melhor formato visual para cada mensagem.</p>
+                      <div class="preview-row">
+                        <div class="preview-card"><strong>+18%</strong><br><span>Receita YoY</span></div>
+                        <div class="preview-card"><strong>-3.2pp</strong><br><span>Margem bruta</span></div>
+                        <div class="preview-card"><strong>4 alavancas</strong><br><span>Plano sugerido</span></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="sidepanel">
+                    <div class="field"><label>Tema</label><input class="input" value="Executive Dark" /></div>
+                    <div class="field"><label>Estilo narrativo</label><input class="input" value="Direto, executivo, orientado a decisão" /></div>
+                    <div class="field"><label>Formato de saída</label><input class="input" value="PPTX + PDF + HTML" /></div>
+                    <div class="field"><label>Validações</label><div class="mini">Sem overflow, contraste OK, brand compliance, citações por insight.</div></div>
+                  </div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="section" id="stack">
+          <h3>Stack recomendada</h3>
+          <div class="grid-3">
+            <article class="panel module-card">
+              <h4>Frontend</h4>
+              <p>Next.js/App Router, React, TypeScript, Tailwind, TanStack Query, Zustand, Framer Motion ou Motion One, virtualização para listas pesadas, editor de canvas com Konva/Fabric ou engine própria.</p>
+            </article>
+            <article class="panel module-card">
+              <h4>Backend e filas</h4>
+              <p>FastAPI ou NestJS para orquestração, workers Python para parsing e análise, Redis + BullMQ/Celery, WebSockets/SSE para progresso em tempo real.</p>
+            </article>
+            <article class="panel module-card">
+              <h4>Dados e IA</h4>
+              <p>Postgres, S3 compatível, pgvector/Weaviate/Qdrant, DuckDB/Polars para datasets grandes, LLM router, embeddings, OCR, parsers tabulares, chart recommendation engine.</p>
+            </article>
+          </div>
+          <div class="kpi-strip">
+            <div class="kpi"><small>Upload</small><span>Multipart + resumable</span></div>
+            <div class="kpi"><small>Performance</small><span>SSE + cache + jobs</span></div>
+            <div class="kpi"><small>Render</small><span>HTML first, PPTX export</span></div>
+            <div class="kpi"><small>Escala</small><span>Workers horizontais</span></div>
+          </div>
+        </section>
+
+        <section class="section" id="security">
+          <h3>O que faltava além do gerador</h3>
+          <p class="section-intro">Para virar produto sério, você precisa tratar autenticação, autorização, billing, templates, observabilidade, governança de dados e operação enterprise como módulos de primeira classe.</p>
+          <article class="panel module-card">
+            <table class="status-table">
+              <thead>
+                <tr><th>Módulo</th><th>Função</th><th>Prioridade</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Login e SSO</td><td>Email/senha, magic link, Google/Microsoft, SAML/OIDC para empresas.</td><td><span class="badge ok">Crítico</span></td></tr>
+                <tr><td>RBAC/Permissões</td><td>Admin, editor, viewer, approver, workspace owner, guest externo.</td><td><span class="badge ok">Crítico</span></td></tr>
+                <tr><td>Billing</td><td>Planos, limites de storage, créditos de IA, cobrança por geração/export.</td><td><span class="badge info">Alto</span></td></tr>
+                <tr><td>Template manager</td><td>Temas, masters, layouts bloqueados, brand kits por cliente.</td><td><span class="badge ok">Crítico</span></td></tr>
+                <tr><td>Observabilidade</td><td>Tracing de jobs, custo por pipeline, falhas de parsing, qualidade do deck.</td><td><span class="badge info">Alto</span></td></tr>
+                <tr><td>Segurança de dados</td><td>Criptografia, retenção, DLP, auditoria, exclusão segura, LGPD.</td><td><span class="badge ok">Crítico</span></td></tr>
+                <tr><td>Human-in-the-loop</td><td>Aprovação humana antes do export final em contextos sensíveis.</td><td><span class="badge warn">Importante</span></td></tr>
+                <tr><td>Quality guardrails</td><td>Checagem de contraste, overflow, consistência numérica, citações e fontes.</td><td><span class="badge ok">Crítico</span></td></tr>
+              </tbody>
+            </table>
+          </article>
+        </section>
+
+        <section class="section" id="admin">
+          <h3>Ferramentas e funções necessárias</h3>
+          <div class="two-col">
+            <article class="panel module-card">
+              <h4>Serviços internos</h4>
+              <div class="bullet-list">
+                <div class="bullet"><span class="mark"></span><div>File ingestion service, parser service, OCR service, embedding/index service.</div></div>
+                <div class="bullet"><span class="mark"></span><div>Insight engine, narrative planner, slide composer, chart recommender.</div></div>
+                <div class="bullet"><span class="mark"></span><div>Theme engine, renderer HTML/PPTX/PDF, asset manager e citation tracker.</div></div>
+                <div class="bullet"><span class="mark"></span><div>Auth service, billing service, audit log, notifications, webhooks e analytics.</div></div>
+              </div>
+            </article>
+            <article class="panel module-card">
+              <h4>Funções de produto</h4>
+              <div class="bullet-list">
+                <div class="bullet"><span class="mark"></span><div>Prompted generation por objetivo: vender, ensinar, reportar, convencer, resumir.</div></div>
+                <div class="bullet"><span class="mark"></span><div>Edição assistida por slide, bloco, gráfico, texto, speaker notes e imagem.</div></div>
+                <div class="bullet"><span class="mark"></span><div>Explainability: “de onde veio este dado?”, “por que esse gráfico?” e “qual insight sustenta o título?”.</div></div>
+                <div class="bullet"><span class="mark"></span><div>Modo enterprise com compliance, revisão, aprovação, biblioteca e tenancy isolada.</div></div>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="section" id="roadmap">
+          <h3>Roadmap de construção</h3>
+          <div class="grid-3">
+            <article class="panel module-card">
+              <h4>Fase 1 · MVP forte</h4>
+              <p>Login, workspace, upload, parsing de XLSX/PDF/DOCX, geração de insights, outline, 3 temas, editor básico e export HTML/PDF.</p>
+              <span class="badge ok">6 a 10 semanas</span>
+            </article>
+            <article class="panel module-card">
+              <h4>Fase 2 · Produto vendável</h4>
+              <p>PPTX editável, colaboração, comentários, templates por marca, billing, analytics, conectores e chart engine avançado.</p>
+              <span class="badge info">10 a 16 semanas</span>
+            </article>
+            <article class="panel module-card">
+              <h4>Fase 3 · Enterprise</h4>
+              <p>SSO, RBAC granular, auditoria, DLP, private model routing, data residency, approvals, observabilidade e SLA.</p>
+              <span class="badge warn">16+ semanas</span>
+            </article>
+          </div>
+        </section>
+
+        <div class="panel footer-note">Proposta de posicionamento: “Uma plataforma que entende dados e documentos, gera insights auditáveis e entrega apresentações corporativas prontas para decisão”.</div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const root = document.documentElement;
+      const btn = document.querySelector('[data-theme-toggle]');
+      let theme = root.getAttribute('data-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      root.setAttribute('data-theme', theme);
+      btn?.addEventListener('click', () => {
+        theme = theme === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', theme);
+      });
+    })();
+  </script>
+</body>
+</html>

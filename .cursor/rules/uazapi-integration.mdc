@@ -1,0 +1,60 @@
+---
+description: Integração UAZAPI WhatsApp — endpoints, auth e webhooks
+globs: "apps/api/**/uazapi/**,apps/api/**/webhook/**"
+alwaysApply: false
+---
+
+# UAZAPI Integration
+
+Documentação oficial: https://docs.uazapi.com/ (uazapiGO V2)
+
+## Autenticação
+
+- Endpoints regulares: header `token` com token da instância
+- Endpoints admin: header `admintoken`
+- Base URL: `https://{subdominio}.uazapi.com` ou `https://free.uazapi.dev` (testes)
+- `number`: E.164 sem `+` (presença/markread); JID `@s.whatsapp.net` em `/chat/read`
+
+## Capacidades verificadas (V2)
+
+| Feature | Endpoint | Limites / formato |
+|---------|----------|-------------------|
+| Texto | `POST /send/text` | `{ number, text, linkPreview? }` |
+| Mídia (foto/vídeo/doc) | `POST /send/media` | `{ number, type, file, text? }` — `file` = URL ou base64; JPG preferido |
+| Botões | `POST /send/menu` type=`button` | Máx **3** botões; label ~**20** chars; `"Label\|id"` ou `"Label\nid"` |
+| Lista | `POST /send/menu` type=`list` | `listButton` obrigatório; seção `"[Título]"`; item `"title\|id\|desc"` (title ~24, desc ~72) |
+| Enquete | `POST /send/menu` type=`poll` | `choices` simples; `selectableCount` |
+| Carousel (menu) | `POST /send/menu` type=`carousel` | `choices` com `[texto]`, `{url}`, botões |
+| Carousel (estruturado) | `POST /send/carousel` | `{ number, text, carousel: [{ text, image, buttons[] }] }` |
+| Localização | `POST /send/location` | Lat/lng + nome/endereço |
+| Presença | `POST /message/presence` | `{ number, presence: composing\|paused }` |
+| Marcar lida | `POST /message/markread` | `{ id: [messageId] }` |
+| Chat lido | `POST /chat/read` | `{ number: JID, read: true }` |
+
+## Webhook — respostas interativas
+
+Campos observados em replies de botão/lista:
+
+- `buttonOrListid` — ID do botão/lista (preferencial)
+- `selectedButtonId` — botão
+- `selectedRowId` — item de lista
+- `content.listResponse.selectedRowId` — fallback aninhado
+
+Normalizar para `buttonId` e usar como `text` inbound (`detalhes:CODIGO`, `fotos:CODIGO`).
+
+## Fluxo imóveis (dwellgo)
+
+1. **Shortlist (2–3 imóveis)** → `POST /send/menu` `type: carousel` com `choices` por imóvel: `[título]`, `{foto}`, `Copiar Código|copy:{sourceId}`, `Ver detalhes|detalhes:{codigo}`, `Fale Conosco|call:{phone}`
+2. **1 imóvel** → `type: button` com `"Ver detalhes|detalhes:codigo"`
+3. **Detalhes** → texto formatado + `type: button` `"Ver fotos|fotos:codigo"`
+4. **Fotos** → `POST /send/carousel` — 1 imagem por cartão; `text` externo = título; cartão = preço · quartos · m² · local
+5. **Fallback** → se `/send/menu` falhar, enviar `reply` via `/send/text`; se carousel falhar, logar e continuar
+6. **Ações nativas** (`copy:`, `call:`, URLs) — tratadas pelo WhatsApp; webhook ignora (sem resposta do agente)
+
+## Regras
+
+- Encapsular HTTP em `UazapiService` — não chamar axios direto
+- Truncar labels (`button-callback.util`) antes de montar `choices`
+- Logar erros UAZAPI com `status`, `response` e `bodySummary` (sem token)
+- Retry/backoff via BullMQ em falhas de envio
+- Recomendação UAZAPI: preferir WhatsApp Business

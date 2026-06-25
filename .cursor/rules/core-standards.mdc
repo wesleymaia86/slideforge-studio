@@ -1,0 +1,31 @@
+---
+description: Padrões centrais de código e arquitetura do projeto
+alwaysApply: true
+---
+
+# Core Standards
+
+## Arquitetura
+
+- Respeitar camadas: `interfaces` → `app` → `domain` ← `infra`.
+- Regras de negócio apenas em `src/domain/`.
+- IO externo (DB, API, fila) apenas em `src/infra/`.
+- Orquestração em `src/app/`; exposição em `src/interfaces/`.
+
+## Código
+
+- Funções pequenas, uma responsabilidade, nomes que expressam intenção.
+- Sem abstrações prematuras; sem duplicação de regra de negócio.
+- Validar entradas na borda; tratar erros com contexto.
+- Config via variáveis de ambiente — nunca hardcode de segredos.
+
+## Escopo de mudanças
+
+- Diff mínimo e focado; não alterar código não relacionado.
+- Reutilizar funções e padrões existentes antes de criar novos.
+- Comentários só para lógica não óbvia ou trade-offs.
+
+## Saída do agente
+
+- Explicar abordagem, listar arquivos alterados, apontar riscos.
+- Seguir `AGENTS.md` e rules do projeto.

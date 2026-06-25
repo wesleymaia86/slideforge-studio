@@ -1,0 +1,68 @@
+# --- Pesados & desnecessários para contexto da IA ---
+node_modules/
+.next/
+dist/
+build/
+out/
+.cache/
+.vercel/
+.git/
+
+# --- Assets binários ---
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.ico
+*.mp4
+*.webm
+*.pdf
+*.zip
+*.tar.gz
+
+# --- Logs & diagnósticos ---
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+coverage/
+.clinic/
+
+# --- Dados sensíveis ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+certs/
+secrets/
+
+# --- IDE & SO ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- SQL & dumps ---
+*.sql
+supabase/.temp/
+
+# --- Python ---
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# --- Docker (manter docker-compose.yml legível) ---
+Dockerfile.*
+docker-compose*.yml
+!docker-compose.yml
+.docker/
+
+# --- Binários Windows ---
+*.msi
+*.exe
+*.dll
+*.sys

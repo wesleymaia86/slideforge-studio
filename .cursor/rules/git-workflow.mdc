@@ -1,0 +1,26 @@
+---
+description: Convenções de Git, commits e pull requests
+alwaysApply: false
+globs: "**/*"
+---
+
+# Git Workflow
+
+## Commits
+
+- Criar commits **somente quando o usuário pedir**.
+- Mensagem concisa (1–2 frases), foco no *porquê*.
+- Nunca commitar `.env`, chaves, certificados ou credenciais.
+- Seguir estilo do histórico recente (`git log`).
+
+## Pull Requests
+
+- Usar template em `.github/PULL_REQUEST_TEMPLATE.md`.
+- Incluir plano de teste verificável.
+- Descrever impacto arquitetural quando relevante.
+
+## Segurança
+
+- Nunca `git push --force` em main/master sem pedido explícito.
+- Nunca pular hooks (`--no-verify`) sem pedido explícito.
+- Nunca alterar `git config`.

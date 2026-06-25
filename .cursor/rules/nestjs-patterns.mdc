@@ -1,0 +1,36 @@
+---
+description: Convenções NestJS para o backend apps/api
+globs: "apps/api/**/*.ts"
+alwaysApply: false
+---
+
+# NestJS Patterns
+
+## Módulos
+
+- Um módulo por domínio: `uazapi`, `webhook`, `lead`, `agent`, etc.
+- IO externo sempre em `infra/` ou módulos `*Module` dedicados
+- Exportar apenas services que outros módulos precisam
+
+## Validação
+
+- Env: Zod em `config/env.schema.ts`
+- HTTP input: class-validator DTOs ou Zod pipes na borda
+- Webhook: normalizar payload em função pura testável
+
+## Filas
+
+- Webhook sempre assíncrono (BullMQ)
+- Jobs idempotentes quando possível
+- `attempts` + backoff exponencial para UAZAPI
+
+## Logs
+
+- Usar `nestjs-pino` — logs estruturados
+- Nunca logar tokens ou conteúdo sensível completo
+
+## Testes
+
+- Unit tests para services puros e normalizers
+- Mockar `HttpService` para UAZAPI
+- E2E na Fase 2+

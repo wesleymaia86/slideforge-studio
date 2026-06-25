@@ -1,0 +1,39 @@
+---
+description: OpenRouter — roteamento multi-agente por tarefa
+globs: "apps/api/**/ai/**,apps/api/**/agent/**,apps/api/**/embedding/**"
+alwaysApply: false
+---
+
+# OpenRouter Multi-Agente
+
+Documentação: https://openrouter.ai/docs
+
+## Regras
+
+- Toda chamada LLM/embeddings passa por **OpenRouter** (`OPENROUTER_API_KEY`)
+- Nunca usar OpenAI direto — usar `OpenRouterProvider` e `OpenRouterClientService`
+- Cada perfil de agente tem modelo próprio via env `OPENROUTER_MODEL_*`
+
+## Perfis
+
+| Perfil | Env | Responsabilidade |
+|--------|-----|------------------|
+| `atendimento` | `OPENROUTER_MODEL_ATENDIMENTO` | Saudação, intenção |
+| `triagem` | `OPENROUTER_MODEL_TRIAGEM` | Coleta de dados |
+| `qualificacao` | `OPENROUTER_MODEL_QUALIFICACAO` | Resumo, score |
+| `busca_imoveis` | `OPENROUTER_MODEL_IMOVEIS` | Apresentar imóveis |
+| `handoff` | `OPENROUTER_MODEL_HANDOFF` | Transferência humana |
+| `embedding` | `OPENROUTER_MODEL_EMBEDDING` | Vetores RAG |
+
+## Roteamento
+
+- `AgentRouterService.resolveProfileFromFluxo()` — escolhe perfil pelo estado da conversa
+- `AgentRouterService.resolveProfileAfterTool()` — troca perfil após tool call
+- `AgentRouterService.filterTools()` — limita tools por perfil
+
+## Adicionar novo agente
+
+1. Adicionar valor em `AgentProfile` enum
+2. Adicionar env `OPENROUTER_MODEL_<NOME>`
+3. Mapear em `AgentRouterService.getModel()` e `getProfileInstruction()`
+4. Definir tools permitidas em `filterTools()`

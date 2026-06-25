@@ -1,0 +1,27 @@
+---
+description: Práticas de segurança para código e configuração
+alwaysApply: true
+---
+
+# Security
+
+## Segredos
+
+- Nunca hardcodar tokens, senhas, API keys ou certificados.
+- Usar `.env` (gitignored) e `.env.example` (sem valores reais).
+- Alertar o usuário se pedir commit de arquivos sensíveis.
+
+## Entrada e saída
+
+- Validar e sanitizar toda entrada externa na borda da aplicação.
+- Logs úteis para operação — sem vazar PII ou credenciais.
+
+## Dependências
+
+- Não adicionar dependência nova sem justificar benefício técnico.
+- Preferir bibliotecas mantidas e com superfície de ataque conhecida.
+
+## MCP e automação
+
+- Revisar permissões de servidores MCP antes de executar ações destrutivas.
+- Hooks em `.cursor/hooks/` podem bloquear comandos de rede — respeitar.

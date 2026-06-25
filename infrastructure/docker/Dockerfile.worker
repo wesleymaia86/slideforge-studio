@@ -1,0 +1,54 @@
+# syntax=docker/dockerfile:1.7
+# -- Stage 1: deps --------------------------------------------------------------
+FROM node:20-alpine AS deps
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+WORKDIR /app
+
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY apps/worker/package.json ./apps/worker/
+COPY packages/types/package.json ./packages/types/
+COPY packages/config/package.json ./packages/config/
+COPY packages/shared/package.json ./packages/shared/
+COPY packages/ai/package.json ./packages/ai/
+COPY packages/slides/package.json ./packages/slides/
+COPY prisma ./prisma
+
+RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile --filter @slideforge/worker...
+
+# -- Stage 2: builder -----------------------------------------------------------
+FROM node:20-alpine AS builder
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+WORKDIR /app
+
+COPY --from=deps /app .
+COPY apps/worker ./apps/worker
+COPY packages/types ./packages/types
+COPY packages/config ./packages/config
+COPY packages/shared ./packages/shared
+COPY packages/ai ./packages/ai
+COPY packages/slides ./packages/slides
+COPY tsconfig.base.json turbo.json ./
+
+RUN pnpm --filter @slideforge/worker build
+RUN pnpm --filter @slideforge/worker deploy /prod --prod
+
+# -- Stage 3: runner ------------------------------------------------------------
+FROM node:20-alpine AS runner
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 workeruser
+
+WORKDIR /app
+ENV NODE_ENV=production
+
+COPY --from=builder --chown=workeruser:nodejs /prod .
+COPY --from=builder --chown=workeruser:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=workeruser:nodejs /app/generated ./generated
+
+USER workeruser
+EXPOSE 3002
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD wget -qO- http://localhost:3002/health || exit 1
+
+CMD ["node", "dist/main.js"]

@@ -1,0 +1,164 @@
+﻿version: "3.9"
+
+# ─────────────────────────────────────────────────────────
+#  SlideForge Studio — local development stack
+#  Usage: docker compose -f docker-compose.dev.yml up
+#  Note: docker-compose.yml has minimal infra-only services.
+#        This file adds application services on top.
+# ─────────────────────────────────────────────────────────
+
+x-common-env: &common-env
+  NODE_ENV: development
+  DATABASE_URL: postgresql://${POSTGRES_USER:-slideforge}:${POSTGRES_PASSWORD:-slideforge}@postgres:5432/${POSTGRES_DB:-slideforge}
+  DIRECT_DATABASE_URL: postgresql://${POSTGRES_USER:-slideforge}:${POSTGRES_PASSWORD:-slideforge}@postgres:5432/${POSTGRES_DB:-slideforge}
+  REDIS_URL: redis://redis:6379
+  STORAGE_ENDPOINT: http://minio:9000
+  STORAGE_BUCKET: ${STORAGE_BUCKET:-slideforge}
+  STORAGE_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
+  STORAGE_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
+  STORAGE_REGION: us-east-1
+  STORAGE_FORCE_PATH_STYLE: "true"
+
+services:
+  # ── Infrastructure ──────────────────────────────────────
+  postgres:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-slideforge}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-slideforge}
+      POSTGRES_DB: ${POSTGRES_DB:-slideforge}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-slideforge} -d ${POSTGRES_DB:-slideforge}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Application services ─────────────────────────────────
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+      target: builder
+    restart: unless-stopped
+    environment:
+      <<: *common-env
+      PORT: 3001
+      HOST: 0.0.0.0
+      API_URL: http://localhost:3001
+      WEB_URL: http://localhost:3000
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me-32chars-min}
+      JWT_EXPIRY: ${JWT_EXPIRY:-15m}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev-refresh-secret-change-me-32c}
+      JWT_REFRESH_EXPIRY: ${JWT_REFRESH_EXPIRY:-30d}
+      LOG_LEVEL: ${LOG_LEVEL:-debug}
+      EMAIL_PROVIDER: console
+      AI_AGENT_ENABLED: ${AI_AGENT_ENABLED:-false}
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
+
+  worker:
+    build:
+      context: ./apps/worker
+      dockerfile: Dockerfile
+      target: builder
+    restart: unless-stopped
+    environment:
+      <<: *common-env
+      PORT: 8000
+      LOG_LEVEL: ${LOG_LEVEL:-debug}
+      AI_AGENT_ENABLED: ${AI_AGENT_ENABLED:-false}
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
+
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+      target: builder
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:3001
+        NEXT_PUBLIC_APP_ENV: development
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-dev-nextauth-secret-change-me}
+      API_URL: http://api:3001
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+    ports:
+      - "3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 20s
+      retries: 3
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
