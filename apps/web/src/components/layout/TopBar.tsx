@@ -32,7 +32,7 @@ const routeLabels: Record<string, string> = {
 }
 
 function useBreadcrumbs(): BreadcrumbItem[] {
-  const pathname = usePathname()
+  const pathname = usePathname() ?? ''
   const segments = pathname.split('/').filter(Boolean)
 
   return segments.map((seg, i) => {

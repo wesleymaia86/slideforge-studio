@@ -39,7 +39,7 @@ function projectNav(id: string): NavItem[] {
 
 export function AppSidebar() {
   const { data: session } = useSession()
-  const pathname = usePathname()
+  const pathname = usePathname() ?? ''
   const router = useRouter()
   const { sidebarCollapsed, toggleSidebar } = useAppStore()
 
