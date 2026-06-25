@@ -10,7 +10,7 @@ RUN apk add --no-cache libc6-compat openssl
 COPY . .
 RUN pnpm install --frozen-lockfile
 RUN pnpm exec prisma generate --schema=prisma/schema.prisma
-RUN pnpm --filter @slideforge/api build
+RUN pnpm --filter @slideforge/api... build
 RUN pnpm deploy --filter @slideforge/api --prod /prod/api
 
 FROM node:20-alpine AS runner
@@ -23,6 +23,7 @@ RUN apk add --no-cache openssl curl && \
     adduser --system --uid 1001 nestjs
 
 COPY --from=builder /prod/api ./
+COPY --from=builder /app/apps/api/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 
 USER nestjs
