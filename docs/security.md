@@ -56,29 +56,13 @@ Client (browser)
 | Token revocation | No Redis blocklist for logout | ⚠ Missing |
 | Guard registration | `JwtAuthGuard` extends `AuthGuard('jwt')` — per-route only | ⚠ Opt-in (risk) |
 
-**FINDING [HIGH] — Weak JWT fallback in `jwt.strategy.ts`:**
+**FINDING [HIGH] — Weak JWT fallback in `jwt.strategy.ts`:** ✅ **Fixed**
 
-```typescript
-secretOrKey: process.env['JWT_SECRET'] ?? 'dev-secret-change-me',
-```
+Previously used `process.env['JWT_SECRET'] ?? 'dev-secret-change-me'`. Now uses `ConfigService.getOrThrow('JWT_SECRET')` and `validateEnv()` from `@slideforge/config` at boot — no fallback.
 
-If `JWT_SECRET` is not set, the app starts with a predictable secret. In production this is catastrophic — attackers could forge valid tokens.
+**FINDING [MEDIUM] — Demo login in `apps/web/auth.ts`:** ✅ **Fixed**
 
-**Remediation:** Throw on missing `JWT_SECRET` at startup via Zod env validation (already defined in `packages/config`). Remove the fallback entirely.
-
-**FINDING [MEDIUM] — Demo login in `apps/web/auth.ts`:**
-
-```typescript
-if (process.env.NODE_ENV === 'development') {
-  if (email === 'demo@slideforge.io' && password === 'demo') {
-    return { id: 'demo-user-1', accessToken: 'demo-token', role: 'admin' }
-  }
-}
-```
-
-The `demo-token` is not validated by the API's JWT guard. If `NODE_ENV=development` leaks to production, or if the API guard doesn't reject `demo-token`, this is a complete auth bypass.
-
-**Remediation:** Ensure `NODE_ENV=production` is set in all production deployments. Add an API-side check that rejects tokens not signed with `JWT_SECRET`.
+Demo login now requires explicit `ALLOW_DEMO_LOGIN=true` **and** `NODE_ENV !== 'production'`. Default is off. Never set `ALLOW_DEMO_LOGIN` in Coolify production env.
 
 **Risk:** If `JwtAuthGuard` is registered only at route level (opt-in), newly added routes are unprotected by default. **Recommendation:** Register as global guard and use `@Public()` decorator for explicit opt-out.
 

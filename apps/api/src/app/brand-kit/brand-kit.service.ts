@@ -3,9 +3,13 @@ import { PrismaService } from '../../infra/database/prisma.service';
 
 export interface UpsertBrandKitDto {
   name: string;
-  colorsJson?: object;
-  fontsJson?: object;
-  logosJson?: object;
+  primaryColor?: string;
+  secondaryColor?: string;
+  accentColor?: string;
+  backgroundColor?: string;
+  fontHeading?: string;
+  fontBody?: string;
+  isDefault?: boolean;
 }
 
 @Injectable()

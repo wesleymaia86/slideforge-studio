@@ -22,7 +22,7 @@ export class AdminController {
       this.prisma.workspace.findMany({
         skip: (p - 1) * ps,
         take: ps,
-        include: { _count: { select: { members: true, projects: true } } },
+        include: { _count: { select: { memberships: true, projects: true } } },
         orderBy: { createdAt: 'desc' },
       }),
       this.prisma.workspace.count(),

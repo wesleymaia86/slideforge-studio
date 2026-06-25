@@ -10,8 +10,8 @@ export interface CreateProjectDto {
 export class ProjectService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(workspaceId: string, dto: CreateProjectDto) {
-    return this.prisma.project.create({ data: { workspaceId, ...dto } });
+  async create(workspaceId: string, createdByUserId: string, dto: CreateProjectDto) {
+    return this.prisma.project.create({ data: { workspaceId, createdByUserId, ...dto } });
   }
 
   async list(workspaceId: string) {

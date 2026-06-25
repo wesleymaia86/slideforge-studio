@@ -9,18 +9,26 @@ export interface CreateDeckDto {
 
 export interface CreateSlideDto {
   position: number;
-  title?: string;
-  layoutType?: string;
-  contentJson?: object;
-  notesText?: string;
+  layout?: string;
+  content?: object;
+  speakerNotes?: string;
 }
 
 @Injectable()
 export class DeckService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(projectId: string, dto: CreateDeckDto) {
-    return this.prisma.deck.create({ data: { projectId, ...dto } });
+  async create(projectId: string, workspaceId: string, createdByUserId: string, dto: CreateDeckDto) {
+    return this.prisma.deck.create({
+      data: {
+        projectId,
+        workspaceId,
+        createdByUserId,
+        title: dto.name,
+        description: dto.description,
+        thumbnailUrl: dto.thumbnailUrl,
+      },
+    });
   }
 
   async list(projectId: string) {
@@ -42,7 +50,14 @@ export class DeckService {
 
   async update(id: string, dto: Partial<CreateDeckDto>) {
     await this.findOne(id);
-    return this.prisma.deck.update({ where: { id }, data: dto });
+    return this.prisma.deck.update({
+      where: { id },
+      data: {
+        title: dto.name,
+        description: dto.description,
+        thumbnailUrl: dto.thumbnailUrl,
+      },
+    });
   }
 
   async delete(id: string) {
@@ -54,7 +69,15 @@ export class DeckService {
 
   async addSlide(deckId: string, dto: CreateSlideDto) {
     await this.findOne(deckId);
-    return this.prisma.slide.create({ data: { deckId, ...dto } });
+    return this.prisma.slide.create({
+      data: {
+        deckId,
+        position: dto.position,
+        layout: (dto.layout ?? 'content') as Parameters<typeof this.prisma.slide.create>[0]['data']['layout'],
+        content: dto.content ?? {},
+        speakerNotes: dto.speakerNotes,
+      },
+    });
   }
 
   async listSlides(deckId: string) {
@@ -65,7 +88,15 @@ export class DeckService {
   }
 
   async updateSlide(slideId: string, dto: Partial<CreateSlideDto>) {
-    return this.prisma.slide.update({ where: { id: slideId }, data: dto });
+    return this.prisma.slide.update({
+      where: { id: slideId },
+      data: {
+        position: dto.position,
+        layout: dto.layout as Parameters<typeof this.prisma.slide.update>[0]['data']['layout'],
+        content: dto.content,
+        speakerNotes: dto.speakerNotes,
+      },
+    });
   }
 
   async deleteSlide(slideId: string) {

@@ -10,8 +10,10 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { WorkspaceMemberGuard } from '../shared/guards/workspace-member.guard';
 import { Roles } from '../shared/decorators/roles.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { DeckService } from '../../../app/deck/deck.service';
 import { MemberRole } from '@slideforge/types';
+import type { AuthenticatedUser } from '../../../domain/auth/entities/user.entity';
 
 class CreateDeckDto {
   @ApiProperty() @IsString() name!: string;
@@ -44,8 +46,13 @@ export class DeckController {
   @Post()
   @Roles(MemberRole.EDITOR)
   @ApiOperation({ summary: 'Create deck' })
-  create(@Param('projectId') pid: string, @Body() dto: CreateDeckDto) {
-    return this.deckService.create(pid, dto);
+  create(
+    @Param('workspaceId') wsId: string,
+    @Param('projectId') pid: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: CreateDeckDto,
+  ) {
+    return this.deckService.create(pid, wsId, user.id, dto);
   }
 
   @Get()

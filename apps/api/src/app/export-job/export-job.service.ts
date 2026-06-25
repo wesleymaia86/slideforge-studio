@@ -1,15 +1,20 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../infra/database/prisma.service';
-import { ExportFormat, ExportStatus } from '@prisma/client';
+
+export type ExportFormat = 'pptx' | 'pdf' | 'png' | 'html';
 
 @Injectable()
 export class ExportJobService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(deckId: string, format: ExportFormat) {
-    // Stub: creates the job record; actual export processing would be dispatched to a queue
+  async create(deckId: string, requestedByUserId: string, format: ExportFormat) {
     return this.prisma.exportJob.create({
-      data: { deckId, format, status: ExportStatus.PENDING },
+      data: {
+        deckId,
+        requestedByUserId,
+        format,
+        status: 'pending',
+      },
     });
   }
 

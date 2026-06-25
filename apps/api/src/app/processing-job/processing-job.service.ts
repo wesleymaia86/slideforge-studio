@@ -1,10 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../infra/database/prisma.service';
+import { JobStatus } from '@slideforge/types';
 import type { JobProgressUpdate, ParsedArtifactPayload } from '@slideforge/types';
 
 @Injectable()
 export class ProcessingJobService {
   constructor(private readonly prisma: PrismaService) {}
+
+  private normalizeJobStatus(status: string): JobStatus {
+    if (status === 'processing' || status === 'running') return JobStatus.RUNNING;
+    if (Object.values(JobStatus).includes(status as JobStatus)) return status as JobStatus;
+    return JobStatus.PENDING;
+  }
 
   async findOne(id: string) {
     const job = await this.prisma.processingJob.findUnique({ where: { id } });
@@ -24,15 +32,17 @@ export class ProcessingJobService {
     const job = await this.prisma.processingJob.findUnique({ where: { id: dto.jobId } });
     if (!job) throw new NotFoundException('Job not found');
 
+    const status = this.normalizeJobStatus(dto.status);
+
     await this.prisma.processingJob.update({
       where: { id: dto.jobId },
       data: {
-        status: dto.status as string,
+        status,
         progress: dto.progress,
         errorMessage: dto.errorMessage,
-        startedAt: dto.status === 'processing' ? (job.startedAt ?? new Date()) : undefined,
+        startedAt: status === JobStatus.RUNNING ? (job.startedAt ?? new Date()) : undefined,
         completedAt:
-          dto.status === 'completed' || dto.status === 'failed' ? new Date() : undefined,
+          status === JobStatus.COMPLETED || status === JobStatus.FAILED ? new Date() : undefined,
       },
     });
   }
@@ -59,7 +69,7 @@ export class ProcessingJobService {
           columnCount: payload.columnCount,
           sheetNames: payload.sheetNames,
           schema: payload.schema,
-        },
+        } as unknown as Prisma.InputJsonValue,
         wordCount: payload.rowCount,
         pageCount: payload.sheetNames.length,
         rawText: payload.preview.map((r) => JSON.stringify(r)).join('\n'),

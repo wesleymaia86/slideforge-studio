@@ -1,22 +1,21 @@
 import {
-  Controller, Get, Post, Patch, Delete, Body, Param,
+  Controller, Get, Post, Delete, Body, Param,
   UseGuards, Query, HttpCode, HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiQuery } from '@nestjs/swagger';
-import { IsString, IsOptional, IsEnum } from 'class-validator';
+import { IsString, IsOptional } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { WorkspaceMemberGuard } from '../shared/guards/workspace-member.guard';
 import { Roles } from '../shared/decorators/roles.decorator';
 import { InsightService } from '../../../app/insight/insight.service';
-import { InsightSeverity, MemberRole } from '@slideforge/types';
+import { MemberRole } from '@slideforge/types';
 
 class CreateInsightDto {
-  @ApiPropertyOptional() @IsString() @IsOptional() processingJobId?: string;
-  @ApiPropertyOptional() @IsString() @IsOptional() parsedArtifactId?: string;
-  @ApiProperty() @IsString() title!: string;
-  @ApiProperty() @IsString() bodyMarkdown!: string;
-  @ApiPropertyOptional({ enum: InsightSeverity }) @IsEnum(InsightSeverity) @IsOptional() severity?: InsightSeverity;
+  @ApiProperty() @IsString() projectId!: string;
+  @ApiProperty({ example: 'summary' }) @IsString() type!: string;
+  @ApiProperty() @IsString() content!: string;
+  @ApiPropertyOptional() @IsString() @IsOptional() modelUsed?: string;
 }
 
 @ApiTags('insights')
@@ -34,15 +33,10 @@ export class InsightController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'List insights by job or artifact' })
-  @ApiQuery({ name: 'jobId', required: false })
-  @ApiQuery({ name: 'artifactId', required: false })
-  list(
-    @Query('jobId') jobId?: string,
-    @Query('artifactId') artifactId?: string,
-  ) {
-    if (jobId) return this.insightService.listByJob(jobId);
-    if (artifactId) return this.insightService.listByArtifact(artifactId);
+  @ApiOperation({ summary: 'List insights by project' })
+  @ApiQuery({ name: 'projectId', required: false })
+  list(@Query('projectId') projectId?: string) {
+    if (projectId) return this.insightService.listByProject(projectId);
     return [];
   }
 
@@ -50,13 +44,6 @@ export class InsightController {
   @ApiOperation({ summary: 'Get insight' })
   findOne(@Param('insightId') id: string) {
     return this.insightService.findOne(id);
-  }
-
-  @Patch(':insightId')
-  @Roles(MemberRole.EDITOR)
-  @ApiOperation({ summary: 'Update insight' })
-  update(@Param('insightId') id: string, @Body() dto: CreateInsightDto) {
-    return this.insightService.update(id, dto);
   }
 
   @Delete(':insightId')

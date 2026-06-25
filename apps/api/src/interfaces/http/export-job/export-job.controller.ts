@@ -1,17 +1,18 @@
 import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
-import { IsEnum } from 'class-validator';
+import { IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { WorkspaceMemberGuard } from '../shared/guards/workspace-member.guard';
 import { Roles } from '../shared/decorators/roles.decorator';
-import { ExportJobService } from '../../../app/export-job/export-job.service';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { ExportJobService, ExportFormat } from '../../../app/export-job/export-job.service';
 import { MemberRole } from '@slideforge/types';
-import { ExportFormat } from '@prisma/client';
+import type { AuthenticatedUser } from '../../../domain/auth/entities/user.entity';
 
 class CreateExportJobDto {
-  @ApiProperty({ enum: ExportFormat })
-  @IsEnum(ExportFormat)
+  @ApiProperty({ example: 'pptx', enum: ['pptx', 'pdf', 'png', 'html'] })
+  @IsString()
   format!: ExportFormat;
 }
 
@@ -25,8 +26,12 @@ export class ExportJobController {
   @Post()
   @Roles(MemberRole.EDITOR)
   @ApiOperation({ summary: 'Create export job (stub)' })
-  create(@Param('deckId') deckId: string, @Body() dto: CreateExportJobDto) {
-    return this.exportJobService.create(deckId, dto.format);
+  create(
+    @Param('deckId') deckId: string,
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: CreateExportJobDto,
+  ) {
+    return this.exportJobService.create(deckId, user.id, dto.format);
   }
 
   @Get()

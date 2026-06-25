@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { LoggerModule } from 'nestjs-pino';
@@ -18,6 +19,7 @@ import { AuditLogModule } from './interfaces/http/audit-log/audit-log.module';
 import { BrandKitModule } from './interfaces/http/brand-kit/brand-kit.module';
 import { AdminModule } from './interfaces/http/admin/admin.module';
 import { HealthModule } from './interfaces/http/health/health.module';
+import { JwtAuthGuard } from './interfaces/http/auth/guards/jwt-auth.guard';
 
 @Module({
   imports: [
@@ -33,9 +35,16 @@ import { HealthModule } from './interfaces/http/health/health.module';
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 120 }]),
 
     BullModule.forRootAsync({
-      useFactory: () => ({
-        redis: process.env['REDIS_URL'] ?? 'redis://localhost:6379',
-      }),
+      useFactory: () => {
+        const redisUrl = new URL(process.env['REDIS_URL'] ?? 'redis://localhost:6379');
+        return {
+          redis: {
+            host: redisUrl.hostname,
+            port: parseInt(redisUrl.port || '6379', 10),
+            password: redisUrl.password || undefined,
+          },
+        };
+      },
     }),
 
     PrismaModule,
@@ -53,5 +62,6 @@ import { HealthModule } from './interfaces/http/health/health.module';
     AdminModule,
     HealthModule,
   ],
+  providers: [{ provide: APP_GUARD, useExisting: JwtAuthGuard }],
 })
 export class AppModule {}

@@ -16,28 +16,25 @@ export interface UploadResult {
 export class S3Adapter {
   private readonly client: S3Client;
   private readonly bucket: string;
-  private readonly publicUrl: string;
+  private readonly endpoint: string;
   private readonly logger = new Logger(S3Adapter.name);
 
   constructor() {
+    this.endpoint = process.env['STORAGE_ENDPOINT'] ?? 'http://localhost:9000';
+    this.bucket = process.env['STORAGE_BUCKET'] ?? 'slideforge-uploads';
+
     this.client = new S3Client({
-      endpoint: process.env['S3_ENDPOINT'] ?? 'http://localhost:9000',
-      region: process.env['S3_REGION'] ?? 'us-east-1',
+      endpoint: this.endpoint,
+      region: process.env['STORAGE_REGION'] ?? 'us-east-1',
       credentials: {
-        accessKeyId: process.env['S3_ACCESS_KEY'] ?? 'minioadmin',
-        secretAccessKey: process.env['S3_SECRET_KEY'] ?? 'minioadmin',
+        accessKeyId: process.env['STORAGE_ACCESS_KEY'] ?? 'minioadmin',
+        secretAccessKey: process.env['STORAGE_SECRET_KEY'] ?? 'minioadmin',
       },
-      forcePathStyle: true,
+      forcePathStyle: process.env['STORAGE_FORCE_PATH_STYLE'] === 'true',
     });
-    this.bucket = process.env['S3_BUCKET'] ?? 'slideforge-assets';
-    this.publicUrl = process.env['S3_PUBLIC_URL'] ?? `http://localhost:9000/${this.bucket}`;
   }
 
-  async upload(
-    key: string,
-    body: Buffer,
-    mimeType: string,
-  ): Promise<UploadResult> {
+  async upload(key: string, body: Buffer, mimeType: string): Promise<UploadResult> {
     await this.client.send(
       new PutObjectCommand({
         Bucket: this.bucket,
@@ -49,7 +46,7 @@ export class S3Adapter {
     this.logger.log(`Uploaded ${key} (${body.length} bytes)`);
     return {
       storageKey: key,
-      storageUrl: `${this.publicUrl}/${key}`,
+      storageUrl: `${this.endpoint}/${this.bucket}/${key}`,
     };
   }
 

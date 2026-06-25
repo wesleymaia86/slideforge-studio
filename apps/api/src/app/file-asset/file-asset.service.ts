@@ -47,7 +47,7 @@ export class FileAssetService {
       data: {
         workspaceId,
         type: 'file_parse',
-        status: 'queued',
+        status: JobStatus.PENDING,
         payload: { fileAssetId: asset.id, storageKey, mimeType: file.mimetype, originalName: file.originalname },
       },
     });

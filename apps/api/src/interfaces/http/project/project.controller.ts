@@ -6,6 +6,8 @@ import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { IsString, IsOptional } from 'class-validator';
 import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import type { AuthenticatedUser } from '../../../domain/auth/entities/user.entity';
 import { WorkspaceMemberGuard } from '../shared/guards/workspace-member.guard';
 import { Roles } from '../shared/decorators/roles.decorator';
 import { ProjectService } from '../../../app/project/project.service';
@@ -26,8 +28,8 @@ export class ProjectController {
   @Post()
   @Roles(MemberRole.EDITOR)
   @ApiOperation({ summary: 'Create project' })
-  create(@Param('workspaceId') wsId: string, @Body() dto: CreateProjectDto) {
-    return this.projectService.create(wsId, dto);
+  create(@Param('workspaceId') wsId: string, @CurrentUser() user: AuthenticatedUser, @Body() dto: CreateProjectDto) {
+    return this.projectService.create(wsId, user.id, dto);
   }
 
   @Get()

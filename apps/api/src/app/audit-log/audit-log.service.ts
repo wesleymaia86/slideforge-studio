@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../infra/database/prisma.service';
-import { AuditAction } from '@prisma/client';
 
 export interface RecordAuditDto {
-  workspaceId?: string;
-  userId?: string;
-  action: AuditAction;
-  entityType?: string;
-  entityId?: string;
-  metaJson?: object;
+  workspaceId: string;
+  actorUserId?: string;
+  action: string;
+  entityType: string;
+  entityId: string;
+  before?: object;
+  after?: object;
   ipAddress?: string;
   userAgent?: string;
 }
@@ -18,7 +18,7 @@ export class AuditLogService {
   constructor(private readonly prisma: PrismaService) {}
 
   async record(dto: RecordAuditDto) {
-    return this.prisma.auditLog.create({ data: dto });
+    return this.prisma.auditLog.create({ data: dto as Parameters<typeof this.prisma.auditLog.create>[0]['data'] });
   }
 
   async listForWorkspace(workspaceId: string, page = 1, pageSize = 50) {
@@ -28,7 +28,7 @@ export class AuditLogService {
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * pageSize,
         take: pageSize,
-        include: { user: { select: { id: true, email: true, name: true } } },
+        include: { actor: { select: { id: true, email: true, name: true } } },
       }),
       this.prisma.auditLog.count({ where: { workspaceId } }),
     ]);
@@ -36,13 +36,13 @@ export class AuditLogService {
   }
 
   async recordUsage(
-    workspaceId: string | null,
+    workspaceId: string,
     userId: string | null,
     eventType: string,
     meta?: object,
   ) {
     return this.prisma.usageEvent.create({
-      data: { workspaceId, userId, eventType, metaJson: meta },
+      data: { workspaceId, userId: userId ?? undefined, eventType, metadata: meta },
     });
   }
 }

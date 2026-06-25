@@ -6,6 +6,7 @@ import { ApiTags, ApiBearerAuth, ApiOperation, ApiHeader } from '@nestjs/swagger
 import { IsString, IsNumber, IsEnum, IsOptional, Min, Max } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Public } from '../auth/decorators/public.decorator';
 import { WorkspaceMemberGuard } from '../shared/guards/workspace-member.guard';
 import { ProcessingJobService } from '../../../app/processing-job/processing-job.service';
 import { JobStatus, type JobProgressUpdate, type ParsedArtifactPayload } from '@slideforge/types';
@@ -40,6 +41,7 @@ export class ProcessingJobController {
 
   /** Internal worker callback — secured by WORKER_API_KEY header */
   @Post('internal/jobs/progress')
+  @Public()
   @ApiHeader({ name: 'x-worker-key', required: true })
   @ApiOperation({ summary: 'Worker: update job progress (internal)' })
   updateProgress(
@@ -51,6 +53,7 @@ export class ProcessingJobController {
   }
 
   @Post('internal/jobs/artifact')
+  @Public()
   @ApiHeader({ name: 'x-worker-key', required: true })
   @ApiOperation({ summary: 'Worker: save parsed artifact (internal)' })
   saveArtifact(

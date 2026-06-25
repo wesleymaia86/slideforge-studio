@@ -3,7 +3,7 @@ import {
   UseGuards, HttpCode, HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
-import { IsString, IsOptional, IsObject } from 'class-validator';
+import { IsString, IsOptional, IsBoolean } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { WorkspaceMemberGuard } from '../shared/guards/workspace-member.guard';
@@ -13,9 +13,13 @@ import { MemberRole } from '@slideforge/types';
 
 class CreateBrandKitDto {
   @ApiProperty() @IsString() name!: string;
-  @ApiPropertyOptional() @IsObject() @IsOptional() colorsJson?: object;
-  @ApiPropertyOptional() @IsObject() @IsOptional() fontsJson?: object;
-  @ApiPropertyOptional() @IsObject() @IsOptional() logosJson?: object;
+  @ApiPropertyOptional({ example: '#01696f' }) @IsString() @IsOptional() primaryColor?: string;
+  @ApiPropertyOptional() @IsString() @IsOptional() secondaryColor?: string;
+  @ApiPropertyOptional() @IsString() @IsOptional() accentColor?: string;
+  @ApiPropertyOptional() @IsString() @IsOptional() backgroundColor?: string;
+  @ApiPropertyOptional() @IsString() @IsOptional() fontHeading?: string;
+  @ApiPropertyOptional() @IsString() @IsOptional() fontBody?: string;
+  @ApiPropertyOptional() @IsBoolean() @IsOptional() isDefault?: boolean;
 }
 
 @ApiTags('brand-kits')

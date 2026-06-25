@@ -26,7 +26,7 @@ export class BriefingService {
   async getBriefingForDeck(deckId: string) {
     return this.prisma.briefing.findMany({
       where: { deckId },
-      include: { outlines: true },
+      include: { outlines: { orderBy: { createdAt: 'desc' }, take: 5 } },
       orderBy: { createdAt: 'desc' },
     });
   }

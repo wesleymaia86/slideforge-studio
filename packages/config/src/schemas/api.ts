@@ -10,6 +10,7 @@ export const apiEnvSchema = commonEnvSchema.extend({
   JWT_EXPIRY: z.string().default("15m").describe("Access token expiry"),
   JWT_REFRESH_SECRET: z.string().min(32).describe("Refresh token signing secret"),
   JWT_REFRESH_EXPIRY: z.string().default("30d").describe("Refresh token expiry"),
+  WORKER_API_KEY: z.string().min(32).describe("Shared secret for worker→API internal callbacks"),
 
   OPENAI_API_KEY: z.string().optional().describe("OpenAI API key"),
   ANTHROPIC_API_KEY: z.string().optional().describe("Anthropic API key"),

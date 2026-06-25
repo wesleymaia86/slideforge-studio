@@ -3,9 +3,11 @@ import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { PrismaService } from '../../../infra/database/prisma.service';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
+import { Public } from '../auth/decorators/public.decorator';
 
 @ApiTags('health')
 @Controller()
+@Public()
 export class HealthController {
   constructor(
     private readonly prisma: PrismaService,
