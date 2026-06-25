@@ -55,7 +55,7 @@ function SectionCard({ section, index, slides }: { section: OutlineSection; inde
 }
 
 export default function OutlinePage() {
-  const { id } = useParams<{ id: string }>()
+  const { id } = (useParams<{ id: string }>() ?? { id: '' })
   const { data: outline, isLoading } = useOutline(id)
   const { data: slides } = useSlides(id)
   const generate = useGenerateOutline(id)

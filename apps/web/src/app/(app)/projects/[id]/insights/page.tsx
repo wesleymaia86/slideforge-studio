@@ -34,7 +34,7 @@ function ConfidenceBar({ value }: { value: number }) {
 }
 
 export default function InsightsPage() {
-  const { id } = useParams<{ id: string }>()
+  const { id } = (useParams<{ id: string }>() ?? { id: '' })
   const { data: insights, isLoading } = useInsights(id)
   const display = insights ?? []
 

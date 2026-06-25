@@ -16,7 +16,7 @@ const FORMAT_OPTIONS = [
 ]
 
 export default function ExportsPage() {
-  const { id } = useParams<{ id: string }>()
+  const { id } = (useParams<{ id: string }>() ?? { id: '' })
   const { data: exports, isLoading } = useExports(id)
   const createExport = useCreateExport(id)
   const display = exports ?? []

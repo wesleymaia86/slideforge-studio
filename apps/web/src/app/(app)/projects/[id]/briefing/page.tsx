@@ -22,7 +22,7 @@ const TONE_OPTIONS = [
 ]
 
 export default function BriefingPage() {
-  const { id } = useParams<{ id: string }>()
+  const { id } = (useParams<{ id: string }>() ?? { id: '' })
   const { data: briefing, isLoading } = useBriefing(id)
   const save = useSaveBriefing(id)
   const [step, setStep] = useState(0)

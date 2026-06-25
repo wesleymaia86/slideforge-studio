@@ -144,7 +144,7 @@ export default function ProjectsPage() {
 function ProjectsPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const workspaceId = searchParams.get('workspaceId') ?? undefined
+  const workspaceId = searchParams?.get('workspaceId') ?? undefined
   const { data: projects, isLoading } = useProjects(workspaceId)
   const setWorkspace = useAppStore((s) => s.setWorkspace)
   const [search, setSearch] = useState('')

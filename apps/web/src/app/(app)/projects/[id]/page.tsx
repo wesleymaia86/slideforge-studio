@@ -15,7 +15,7 @@ interface QuickAction {
 }
 
 export default function ProjectDetailPage() {
-  const { id } = useParams<{ id: string }>()
+  const { id } = (useParams<{ id: string }>() ?? { id: '' })
   const router = useRouter()
   const { data: project, isLoading } = useProject(id)
   const { data: jobs } = useJobs(id)

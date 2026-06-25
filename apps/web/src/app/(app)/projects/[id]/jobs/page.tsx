@@ -70,7 +70,7 @@ function JobRow({ job }: { job: Job }) {
 }
 
 export default function JobsPage() {
-  const { id } = useParams<{ id: string }>()
+  const { id } = (useParams<{ id: string }>() ?? { id: '' })
   const { data: jobs, isLoading, refetch } = useJobs(id)
   const display = jobs ?? []
 

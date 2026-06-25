@@ -8,7 +8,7 @@ import { useSlides } from '@/lib/api/hooks'
 import { SlideFilmstrip, SlideCanvas, EmptyState, Button } from '@slideforge/ui'
 
 export default function EditorPage() {
-  const { id } = useParams<{ id: string }>()
+  const { id } = (useParams<{ id: string }>() ?? { id: '' })
   const { data: slides, isLoading } = useSlides(id)
   const display = slides ?? []
   const [activeIdx, setActiveIdx] = useState(0)

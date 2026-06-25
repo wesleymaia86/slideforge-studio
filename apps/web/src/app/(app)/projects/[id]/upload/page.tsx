@@ -31,7 +31,7 @@ function FileIcon({ mimeType }: { mimeType: string }) {
 }
 
 export default function UploadPage() {
-  const { id } = useParams<{ id: string }>()
+  const { id } = (useParams<{ id: string }>() ?? { id: '' })
   const { data: uploads, isLoading } = useUploads(id)
   const uploadFile = useUploadFile(id)
   const [files, setFiles] = useState<FileItem[]>([])
