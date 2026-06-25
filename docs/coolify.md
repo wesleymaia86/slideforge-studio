@@ -56,7 +56,7 @@ The `create_private_gh` MCP operation requires `github_app_uuid`, which is not e
     "git_repository": "wesleymaia86/slideforge-studio",
     "git_branch": "main",
     "build_pack": "dockerfile",
-    "base_directory": "/apps/api",
+    "base_directory": "/",
     "dockerfile_location": "/apps/api/Dockerfile",
     "ports_exposes": "3001",
     "name": "slideforge-api",
