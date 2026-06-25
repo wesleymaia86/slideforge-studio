@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import { Instrument_Serif, DM_Sans, DM_Mono } from 'next/font/google'
 import './globals.css'
 
+export const dynamic = 'force-dynamic'
+
 const instrumentSerif = Instrument_Serif({
   subsets: ['latin'],
   weight: ['400'],
