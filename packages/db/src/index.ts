@@ -1,3 +1,8 @@
+/**
+ * Re-exports the Prisma client singleton.
+ * Use PrismaService in NestJS (infra/database/prisma.service.ts) — this is for
+ * non-NestJS contexts (scripts, seeds, migrations checks).
+ */
 import { PrismaClient } from '@prisma/client';
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };

@@ -127,6 +127,7 @@ model User {
   avatarUrl     String?
   emailVerified Boolean   @default(false)
   passwordHash  String?
+  isSuperAdmin  Boolean   @default(false)
   lastLoginAt   DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -340,9 +341,10 @@ model Deck {
   project   Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
   workspace Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   brandKit  BrandKit?  @relation(fields: [brandKitId], references: [id], onDelete: SetNull)
-  slides    Slide[]
-  comments  Comment[]
+  slides     Slide[]
+  comments   Comment[]
   exportJobs ExportJob[]
+  briefings  Briefing[]
 
   @@index([workspaceId, status])
   @@index([projectId])
@@ -460,6 +462,37 @@ model Subscription {
   @@index([externalSubscriptionId])
   @@index([externalCustomerId])
   @@map("subscriptions")
+}
+
+// ─── Briefing & Outline ───────────────────────────────────────────────────────
+
+model Briefing {
+  id          String   @id @default(dbgenerated("extensions.gen_random_uuid()")) @db.Uuid
+  deckId      String   @db.Uuid
+  audience    String?  @db.Text
+  objective   String?  @db.Text
+  toneVoice   String?  @db.VarChar(200)
+  contextJson Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  deck     Deck      @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  outlines Outline[]
+
+  @@index([deckId])
+  @@map("briefings")
+}
+
+model Outline {
+  id          String   @id @default(dbgenerated("extensions.gen_random_uuid()")) @db.Uuid
+  briefingId  String   @db.Uuid
+  slidesJson  Json
+  createdAt   DateTime @default(now())
+
+  briefing Briefing @relation(fields: [briefingId], references: [id], onDelete: Cascade)
+
+  @@index([briefingId])
+  @@map("outlines")
 }
 
 // ─── Observability ────────────────────────────────────────────────────────────
