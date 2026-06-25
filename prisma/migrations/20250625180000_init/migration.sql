@@ -1,13 +1,13 @@
 CREATE SCHEMA IF NOT EXISTS extensions;
 
 -- CreateExtension
-CREATE EXTENSION IF NOT EXISTS "pg_trgm" WITH SCHEMA "extensions";
+CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 
 -- CreateExtension
-CREATE EXTENSION IF NOT EXISTS "vector" WITH SCHEMA "extensions";
+CREATE EXTENSION IF NOT EXISTS "vector";
 
 -- CreateExtension
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- CreateEnum
 CREATE TYPE "MemberRole" AS ENUM ('owner', 'admin', 'editor', 'viewer', 'approver');
