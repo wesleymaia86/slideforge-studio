@@ -15,6 +15,7 @@ import { InsightModule } from './interfaces/http/insight/insight.module';
 import { BriefingModule } from './interfaces/http/briefing/briefing.module';
 import { ExportJobModule } from './interfaces/http/export-job/export-job.module';
 import { AuditLogModule } from './interfaces/http/audit-log/audit-log.module';
+import { BrandKitModule } from './interfaces/http/brand-kit/brand-kit.module';
 import { AdminModule } from './interfaces/http/admin/admin.module';
 import { HealthModule } from './interfaces/http/health/health.module';
 
@@ -48,6 +49,7 @@ import { HealthModule } from './interfaces/http/health/health.module';
     BriefingModule,
     ExportJobModule,
     AuditLogModule,
+    BrandKitModule,
     AdminModule,
     HealthModule,
   ],

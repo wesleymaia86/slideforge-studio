@@ -1,41 +1,37 @@
-# ── Stage 1: deps ────────────────────────────────────────────────────────────
-FROM node:20-alpine AS deps
-WORKDIR /app
-RUN apk add --no-cache libc6-compat openssl
-COPY package*.json ./
-RUN npm ci --only=production
+# ── Stage 1: builder ──────────────────────────────────────────────────────────
+FROM python:3.12-slim AS builder
 
-# ── Stage 2: builder ──────────────────────────────────────────────────────────
-FROM node:20-alpine AS builder
 WORKDIR /app
-RUN apk add --no-cache openssl
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run prisma:generate
-RUN npm run build
 
-# ── Stage 3: runner ───────────────────────────────────────────────────────────
-FROM node:20-alpine AS runner
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends build-essential curl && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+
+# ── Stage 2: runner ───────────────────────────────────────────────────────────
+FROM python:3.12-slim AS runner
+
 WORKDIR /app
-ENV NODE_ENV=production
-# Worker exposes a minimal HTTP probe for health checks
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
 ENV PORT=8000
 
-RUN apk add --no-cache openssl curl && \
-    addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 worker
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl && \
+    rm -rf /var/lib/apt/lists/* && \
+    addgroup --system --gid 1001 worker && \
+    adduser --system --uid 1001 --gid 1001 worker
 
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/prisma ./prisma
-COPY package*.json ./
+COPY --from=builder /install /usr/local
+COPY --chown=worker:worker . .
 
 USER worker
 EXPOSE 8000
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
   CMD curl -fs http://localhost:8000/health || exit 1
 
-CMD ["node", "dist/worker.js"]
+# FastAPI via uvicorn (health probe); Celery workers launched separately
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

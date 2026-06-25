@@ -25,15 +25,15 @@ export class WorkspaceService {
       data: { name: dto.name, slug: dto.slug, logoUrl: dto.logoUrl },
     });
 
-    await this.prisma.workspaceMember.create({
-      data: { workspaceId: workspace.id, userId: ownerId, role: MemberRole.OWNER, joinedAt: new Date() },
+    await this.prisma.membership.create({
+      data: { workspaceId: workspace.id, userId: ownerId, role: MemberRole.OWNER },
     });
 
     return workspace;
   }
 
   async listForUser(userId: string) {
-    const memberships = await this.prisma.workspaceMember.findMany({
+    const memberships = await this.prisma.membership.findMany({
       where: { userId },
       include: { workspace: true },
     });
@@ -57,23 +57,23 @@ export class WorkspaceService {
   }
 
   async listMembers(workspaceId: string) {
-    return this.prisma.workspaceMember.findMany({
+    return this.prisma.membership.findMany({
       where: { workspaceId },
       include: { user: { select: { id: true, email: true, name: true, avatarUrl: true } } },
     });
   }
 
   async inviteMember(workspaceId: string, userId: string, role: MemberRole) {
-    return this.prisma.workspaceMember.upsert({
-      where: { workspaceId_userId: { workspaceId, userId } },
-      create: { workspaceId, userId, role, joinedAt: new Date() },
+    return this.prisma.membership.upsert({
+      where: { userId_workspaceId: { workspaceId, userId } },
+      create: { workspaceId, userId, role },
       update: { role },
     });
   }
 
   async removeMember(workspaceId: string, userId: string) {
-    await this.prisma.workspaceMember.delete({
-      where: { workspaceId_userId: { workspaceId, userId } },
+    await this.prisma.membership.delete({
+      where: { userId_workspaceId: { workspaceId, userId } },
     });
   }
 }

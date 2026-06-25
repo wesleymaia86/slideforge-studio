@@ -6,6 +6,66 @@
 
 ---
 
+## MCP Setup Status (completed 2026-06-25)
+
+| Resource | Status | UUID |
+|----------|--------|------|
+| SLIDEFORGE project | ✅ Created via MCP | `cpngzeky5yur0aan0mo68hh7` |
+| `slideforge-postgres` (PostgreSQL 16 + pgvector) | ✅ Created via MCP | `grolg1c581tybkg809mzg24c` |
+| `slideforge-redis` (Redis 7-alpine) | ✅ Created via MCP | `q9wu221pcsxaixgf2zns6wvj` |
+| `slideforge-api` application | ⚠ Needs GitHub App UUID | See manual steps below |
+| `slideforge-worker` application | ⚠ Needs GitHub App UUID | See manual steps below |
+| `slideforge-web` application | ⚠ Needs GitHub App UUID | See manual steps below |
+
+### Manual Step: Get GitHub App UUID
+
+The `create_private_gh` MCP operation requires `github_app_uuid`, which is not exposed by the MCP tool list. Find it:
+
+1. In Coolify UI → **Settings** → **Sources** → Click on the GitHub App connected to `wesleymaia86`
+2. The UUID is in the URL or shown in the source details
+3. Use it in the MCP calls below
+
+### Create applications via MCP (once GitHub App UUID is known)
+
+```json
+// slideforge-api
+{
+  "operation": "create_private_gh",
+  "body": {
+    "project_uuid": "cpngzeky5yur0aan0mo68hh7",
+    "server_uuid": "csow8ss0kscskwk04g0osgcg",
+    "destination_uuid": "qosowcscco0okggggs48s40w",
+    "environment_name": "production",
+    "github_app_uuid": "<YOUR_GITHUB_APP_UUID>",
+    "git_repository": "wesleymaia86/slideforge-studio",
+    "git_branch": "main",
+    "build_pack": "dockerfile",
+    "base_directory": "/apps/api",
+    "dockerfile_location": "/apps/api/Dockerfile",
+    "ports_exposes": "3001",
+    "name": "slideforge-api",
+    "fqdn": "https://api-slideforge.byterush.com.br",
+    "health_check_enabled": true,
+    "health_check_path": "/health",
+    "health_check_port": "3001"
+  }
+}
+```
+
+Repeat similarly for `worker` (`base_directory: /apps/worker`, `ports_exposes: 8000`, no FQDN) and `web` (`base_directory: /apps/web`, `ports_exposes: 3000`, `fqdn: https://studio.byterush.com.br`).
+
+### Internal connection strings (set as env vars in each application)
+
+```
+DATABASE_URL=postgres://slideforge:<PASSWORD>@grolg1c581tybkg809mzg24c:5432/slideforge
+DIRECT_DATABASE_URL=postgres://slideforge:<PASSWORD>@grolg1c581tybkg809mzg24c:5432/slideforge
+REDIS_URL=redis://default:<PASSWORD>@q9wu221pcsxaixgf2zns6wvj:6379/0
+```
+
+> Retrieve the actual passwords from Coolify UI → SLIDEFORGE project → click on each database → "Connection String".
+
+---
+
 ## Existing Projects on this Coolify Instance
 
 | ID | UUID | Name | Description |

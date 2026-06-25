@@ -30,20 +30,12 @@ export class FileAssetService {
         sizeBytes: file.size,
         storageKey,
         storageUrl,
-        uploadedBy,
+        uploadedByUserId: uploadedBy,
       },
     });
 
-    const job = await this.prisma.processingJob.create({
-      data: {
-        fileAssetId: asset.id,
-        status: JobStatus.QUEUED,
-        queuedAt: new Date(),
-      },
-    });
-
-    const payload: ProcessFileJobPayload = {
-      jobId: job.id,
+    const jobPayload: ProcessFileJobPayload = {
+      jobId: '', // will be set after creation
       fileAssetId: asset.id,
       workspaceId,
       storageKey,
@@ -51,7 +43,18 @@ export class FileAssetService {
       originalName: file.originalname,
     };
 
-    await this.queue.add('process-file', payload, {
+    const job = await this.prisma.processingJob.create({
+      data: {
+        workspaceId,
+        type: 'file_parse',
+        status: 'queued',
+        payload: { fileAssetId: asset.id, storageKey, mimeType: file.mimetype, originalName: file.originalname },
+      },
+    });
+
+    jobPayload.jobId = job.id;
+
+    await this.queue.add('process-file', jobPayload, {
       attempts: 3,
       backoff: { type: 'exponential', delay: 2000 },
     });
@@ -71,6 +74,7 @@ export class FileAssetService {
     if (!asset) throw new NotFoundException('File asset not found');
     return asset;
   }
+
 
   async getPresignedUrl(workspaceId: string, id: string) {
     const asset = await this.findOne(workspaceId, id);

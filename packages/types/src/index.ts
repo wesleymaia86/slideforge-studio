@@ -1,28 +1,24 @@
-// ─── Enums (mirror Prisma enums for worker/shared use) ────────────────────────
+/**
+ * @slideforge/types � canonical TypeScript contracts for SlideForge Studio.
+ *
+ * Enum values here mirror Prisma-generated enum values (lowercase).
+ * Re-exports from domain modules for clean import paths.
+ */
 
-export enum MemberRole {
-  OWNER = 'OWNER',
-  ADMIN = 'ADMIN',
-  EDITOR = 'EDITOR',
-  VIEWER = 'VIEWER',
-  APPROVER = 'APPROVER',
-}
+// --- Domain enums & types ----------------------------------------------------
+export * from "./enums";
+export * from "./user";
+export * from "./workspace";
+export * from "./project";
+export * from "./deck";
+export * from "./slide";
+export * from "./ai";
+export * from "./jobs";
+export * from "./subscription";
+export * from "./audit";
+export * from "./api";
 
-export enum JobStatus {
-  PENDING = 'PENDING',
-  QUEUED = 'QUEUED',
-  PROCESSING = 'PROCESSING',
-  DONE = 'DONE',
-  FAILED = 'FAILED',
-}
-
-export enum InsightSeverity {
-  INFO = 'INFO',
-  WARNING = 'WARNING',
-  CRITICAL = 'CRITICAL',
-}
-
-// ─── Job Queue Payloads ────────────────────────────────────────────────────────
+// --- Worker queue payload contracts (used by BullMQ producers/consumers) -----
 
 export interface ProcessFileJobPayload {
   jobId: string;
@@ -35,12 +31,11 @@ export interface ProcessFileJobPayload {
 
 export interface JobProgressUpdate {
   jobId: string;
-  status: JobStatus;
+  /** Maps to JobStatus enum value */
+  status: string;
   progress: number;
   errorMessage?: string;
 }
-
-// ─── Parsed Artifact ──────────────────────────────────────────────────────────
 
 export interface ColumnSchema {
   name: string;
@@ -58,17 +53,13 @@ export interface ParsedArtifactPayload {
   preview: Record<string, unknown>[];
 }
 
-// ─── Insights ─────────────────────────────────────────────────────────────────
-
 export interface InsightPayload {
   jobId: string;
   title: string;
   bodyMarkdown: string;
-  severity: InsightSeverity;
+  severity: "INFO" | "WARNING" | "CRITICAL";
   meta?: Record<string, unknown>;
 }
-
-// ─── Briefing & Outline ───────────────────────────────────────────────────────
 
 export interface BriefingInput {
   audience?: string;
@@ -88,20 +79,4 @@ export interface OutlineSlide {
 export interface GeneratedOutline {
   slides: OutlineSlide[];
   totalSlides: number;
-}
-
-// ─── API Response wrappers ────────────────────────────────────────────────────
-
-export interface PaginatedResponse<T> {
-  data: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-}
-
-export interface ApiError {
-  statusCode: number;
-  message: string;
-  code?: string;
-  details?: unknown;
 }

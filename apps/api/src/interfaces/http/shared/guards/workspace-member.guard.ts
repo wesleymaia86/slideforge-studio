@@ -53,8 +53,8 @@ export class WorkspaceMemberGuard implements CanActivate {
       return true;
     }
 
-    const member = await this.prisma.workspaceMember.findUnique({
-      where: { workspaceId_userId: { workspaceId, userId: user.id } },
+    const member = await this.prisma.membership.findUnique({
+      where: { userId_workspaceId: { workspaceId, userId: user.id } },
     });
     if (!member) throw new ForbiddenException('Not a member of this workspace');
 

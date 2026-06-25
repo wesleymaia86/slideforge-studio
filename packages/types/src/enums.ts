@@ -101,3 +101,9 @@ export enum InsightType {
   ACTION_ITEMS = "action_items",
   CUSTOM = "custom",
 }
+
+export enum InsightSeverity {
+  INFO = "INFO",
+  WARNING = "WARNING",
+  CRITICAL = "CRITICAL",
+}

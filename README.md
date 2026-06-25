@@ -1,143 +1,126 @@
 # SlideForge Studio
 
-**AI Presentation OS** — Create, structure, and design professional presentations with AI assistance.
+AI-powered presentation builder. Monorepo with NestJS API + Python worker.
 
-[![CI](https://github.com/YOUR_ORG/slideforge-studio/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_ORG/slideforge-studio/actions/workflows/ci.yml)
+## Stack
 
----
+| Layer | Technology |
+|-------|-----------|
+| API | NestJS 10, Prisma 5, BullMQ, TypeScript |
+| Worker | Python 3.12, FastAPI, Celery, Redis |
+| Database | PostgreSQL 16 (pgvector) |
+| Queue | Redis 7 |
+| Storage | S3-compatible (MinIO for local dev) |
+| Auth | JWT + email/password (magic link + OAuth stubs) |
 
-## What is this?
-
-SlideForge Studio is an AI-powered presentation platform that enables users to:
-
-- Generate structured slide decks from a brief prompt or document
-- Edit and refine content with multi-agent AI (OpenRouter routing)
-- Collaborate in real-time on presentation assets
-- Export to common formats (PDF, PPTX, web)
-
-### Services
-
-| Service | Tech | Port | Description |
-|---------|------|------|-------------|
-| `web` | Next.js 14 | 3000 | Frontend — editor, dashboard, preview |
-| `api` | NestJS + Prisma | 4000 | REST API, auth, AI orchestration |
-| `worker` | NestJS + BullMQ | 8000 | Async jobs — AI generation, export |
-| `postgres` | PostgreSQL 16 + pgvector | 5432 | Primary database + vector search |
-| `redis` | Redis 7 | 6379 | Job queues, sessions, cache |
-
----
-
-## Quick Start (local development)
-
-### Prerequisites
-
-- Docker Desktop ≥ 24
-- Node.js 20 LTS (for running outside Docker)
-- `gh` CLI (optional, for GitHub operations)
-
-### 1. Clone and configure
+## Quick start
 
 ```bash
-git clone git@github.com:YOUR_ORG/slideforge-studio.git
-cd slideforge-studio
-cp .env.example .env
-# Edit .env with your values (see docs/development.md)
+# 1. Start infrastructure
+docker-compose up -d postgres redis minio
+
+# 2. Install dependencies
+npm install
+
+# 3. Generate Prisma client + run migrations
+npm run prisma:generate
+npm run prisma:migrate
+
+# 4. Start API
+cd apps/api && npm run dev
+
+# 5. Start worker (separate terminal)
+cd apps/worker
+pip install -r requirements.txt
+celery -A celery_app.celery_app worker --loglevel=info --queues=processing
+# Or run the FastAPI health server:
+uvicorn main:app --reload --port 8000
 ```
 
-### 2. Start the full stack
+## Environment
 
-```bash
-docker compose -f docker-compose.dev.yml up --build
+Copy `.env.example` to `.env` and fill in values. See also `apps/worker/.env.example`.
+
+## Endpoints (API prefix: `/api/v1`)
+
+### Auth
+- `POST /auth/register` — email + password registration
+- `POST /auth/login` — email + password login
+- `POST /auth/magic-link` — request magic link (stub)
+- `GET  /auth/google` — Google OAuth redirect (stub)
+- `GET  /auth/microsoft` — Microsoft OAuth redirect (stub)
+- `GET  /auth/me` — current user profile (JWT required)
+
+### Workspaces
+- `POST   /workspaces` — create workspace
+- `GET    /workspaces` — list my workspaces
+- `GET    /workspaces/:workspaceId`
+- `PATCH  /workspaces/:workspaceId`
+- `DELETE /workspaces/:workspaceId` (owner only)
+- `GET    /workspaces/:workspaceId/members`
+- `POST   /workspaces/:workspaceId/members` — invite
+- `DELETE /workspaces/:workspaceId/members/:userId`
+
+### Projects / Decks / Slides
+- CRUD under `/workspaces/:workspaceId/projects`
+- Decks under `/workspaces/:workspaceId/projects/:projectId/decks`
+- Slides CRUD + reorder under `.../decks/:deckId/slides`
+
+### Brand Kits
+- CRUD under `/workspaces/:workspaceId/brand-kits`
+
+### File Assets
+- `POST /workspaces/:workspaceId/file-assets/upload` (multipart) → creates ProcessingJob
+- `GET  /workspaces/:workspaceId/file-assets`
+- `GET  /workspaces/:workspaceId/file-assets/:assetId/presigned-url`
+
+### Processing Jobs
+- `GET  /workspaces/:workspaceId/processing-jobs`
+- `GET  /workspaces/:workspaceId/processing-jobs/:jobId`
+- `POST /internal/jobs/progress` (worker callback, x-worker-key header)
+- `POST /internal/jobs/artifact` (worker callback)
+
+### Insights
+- CRUD under `/workspaces/:workspaceId/insights` with `?jobId=` / `?artifactId=` filters
+
+### Briefing & Outline
+- `POST /workspaces/:workspaceId/decks/:deckId/briefings`
+- `POST /workspaces/:workspaceId/decks/:deckId/briefings/:briefingId/outline` (AI generation)
+
+### Export Jobs (stub)
+- `POST /workspaces/:workspaceId/decks/:deckId/exports`
+- `GET  /workspaces/:workspaceId/decks/:deckId/exports`
+
+### Audit Logs
+- `GET /workspaces/:workspaceId/audit-logs` (admin+)
+
+### Admin (super-admin only)
+- `GET /admin/workspaces`
+- `GET /admin/users`
+- `GET /admin/stats`
+
+### Health
+- `GET /health`
+- `GET /ready`
+
+## Worker capabilities
+
+- Parses: `.xlsx`, `.csv`, `.pdf`, `.docx`
+- Tabular profiling: row/column count, dtypes, nullable columns, sample values
+- Basic insight generation (data quality, numeric columns, multi-sheet)
+- Callbacks to API via `x-worker-key`
+- Health endpoint: `GET /health`, `GET /ready`
+
+## Architecture
+
+```
+src/
+  domain/     # Entities, contracts (no framework deps)
+  app/        # Use-case services
+  infra/      # Prisma, S3, queue adapters
+  interfaces/ # Controllers, guards, DTOs
 ```
 
-Services will be available at:
-- **Web:** http://localhost:3000
-- **API:** http://localhost:4000
-- **API Health:** http://localhost:4000/health
+## RBAC Roles
 
-### 3. Run migrations (first time)
-
-```bash
-docker compose -f docker-compose.dev.yml exec api npm run prisma:migrate
-```
-
----
-
-## Repository Structure
-
-```
-slideforge-studio/
-├── apps/
-│   ├── web/          # Next.js frontend
-│   │   └── Dockerfile
-│   ├── api/          # NestJS API
-│   │   ├── src/
-│   │   │   ├── app/       # Application services / use cases
-│   │   │   ├── domain/    # Entities, rules, contracts
-│   │   │   ├── infra/     # DB, APIs, queues
-│   │   │   └── interfaces/ # Controllers, routes
-│   │   └── Dockerfile
-│   └── worker/       # BullMQ worker
-│       └── Dockerfile
-├── infrastructure/
-│   └── coolify/      # Coolify deployment guides
-├── docs/
-│   ├── architecture.md
-│   ├── deployment.md
-│   ├── coolify.md
-│   ├── development.md
-│   └── security.md
-├── .github/
-│   └── workflows/ci.yml
-├── docker-compose.dev.yml
-├── .env.example
-└── AGENTS.md
-```
-
----
-
-## Documentation
-
-| Doc | Contents |
-|-----|----------|
-| [docs/architecture.md](docs/architecture.md) | System design, data flow, ADRs |
-| [docs/deployment.md](docs/deployment.md) | Production deploy, Coolify, DNS |
-| [docs/coolify.md](docs/coolify.md) | Coolify-specific setup and env vars |
-| [docs/development.md](docs/development.md) | Local setup, debugging, testing |
-| [docs/security.md](docs/security.md) | Security audit findings and controls |
-
----
-
-## Feature Status
-
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Project scaffold & rules | ✅ Done | Cursor rules, AGENTS.md, CI |
-| Dockerfiles + compose | ✅ Done | Multi-stage, health checks |
-| NestJS API boilerplate | ⚠ Stubbed | Structure defined in rules |
-| Next.js frontend | ⚠ Stubbed | Landing page mock available |
-| AI generation pipeline | ⚠ Stubbed | OpenRouter router designed |
-| UAZAPI WhatsApp channel | ⚠ Stubbed | Integration spec in rules |
-| BullMQ worker | ⚠ Stubbed | Queue patterns defined |
-| Auth (JWT + guards) | ⚠ Stubbed | See security.md P0 items |
-| Prisma schema | ⚠ Stubbed | Needs domain entities |
-| Tests | ⚠ Stubbed | Structure defined |
-
----
-
-## Credentials Needed (manual)
-
-See [docs/deployment.md](docs/deployment.md#credentials-checklist) for the full checklist. Key items:
-
-- [ ] `OPENROUTER_API_KEY` — from openrouter.ai
-- [ ] `UAZAPI_INSTANCE_TOKEN` — from your UAZAPI dashboard
-- [ ] `JWT_SECRET` — generate: `openssl rand -hex 32`
-- [ ] `WEBHOOK_SECRET` — generate: `openssl rand -hex 32`
-- [ ] GitHub App credentials (for Coolify private repo access)
-- [ ] Coolify project + environment setup
-
----
-
-## Contributing
-
-Follow the [AGENTS.md](AGENTS.md) guidelines and `.cursor/rules/` for coding standards.
+`OWNER > ADMIN > EDITOR > APPROVER > VIEWER`

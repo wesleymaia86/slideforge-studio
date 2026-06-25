@@ -1,14 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../infra/database/prisma.service';
-import { InsightSeverity } from '@slideforge/types';
 
 export interface CreateInsightDto {
-  processingJobId?: string;
-  parsedArtifactId?: string;
-  title: string;
-  bodyMarkdown: string;
-  severity?: InsightSeverity;
-  metaJson?: object;
+  projectId: string;
+  type: string;
+  content: string;
+  modelUsed?: string;
 }
 
 @Injectable()
@@ -16,19 +13,12 @@ export class InsightService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateInsightDto) {
-    return this.prisma.insight.create({ data: dto });
+    return this.prisma.insight.create({ data: dto as Parameters<typeof this.prisma.insight.create>[0]['data'] });
   }
 
-  async listByJob(jobId: string) {
+  async listByProject(projectId: string) {
     return this.prisma.insight.findMany({
-      where: { processingJobId: jobId },
-      orderBy: { createdAt: 'desc' },
-    });
-  }
-
-  async listByArtifact(artifactId: string) {
-    return this.prisma.insight.findMany({
-      where: { parsedArtifactId: artifactId },
+      where: { projectId },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -37,11 +27,6 @@ export class InsightService {
     const insight = await this.prisma.insight.findUnique({ where: { id } });
     if (!insight) throw new NotFoundException('Insight not found');
     return insight;
-  }
-
-  async update(id: string, dto: Partial<CreateInsightDto>) {
-    await this.findOne(id);
-    return this.prisma.insight.update({ where: { id }, data: dto });
   }
 
   async delete(id: string) {

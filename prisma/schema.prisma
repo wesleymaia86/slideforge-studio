@@ -4,13 +4,11 @@
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["postgresqlExtensions"]
-  output          = "../generated/prisma"
 }
 
 datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
-  directUrl  = env("DIRECT_DATABASE_URL")
   extensions = [pgvector(map: "vector", schema: "extensions"), uuid_ossp(map: "uuid-ossp", schema: "extensions"), pg_trgm(map: "pg_trgm", schema: "extensions")]
 }
 
