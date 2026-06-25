@@ -23,6 +23,7 @@
     "@nestjs/swagger": "^7.3.1",
     "@nestjs/throttler": "^5.1.2",
     "@prisma/client": "^5.14.0",
+    "prisma": "^5.14.0",
     "@slideforge/config": "workspace:*",
     "@slideforge/types": "workspace:*",
     "@slideforge/ai": "workspace:*",
@@ -57,7 +58,6 @@
     "@typescript-eslint/parser": "^7.13.0",
     "eslint": "^8.57.0",
     "jest": "^29.7.0",
-    "prisma": "^5.14.0",
     "ts-jest": "^29.1.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
