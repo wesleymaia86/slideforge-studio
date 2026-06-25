@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { ArrowRight, Upload, Cpu, BarChart3, FileText, AlignLeft, Presentation, Download, Clock, Edit2 } from 'lucide-react'
 import { TopBar } from '@/components/layout/TopBar'
 import { useProject, useJobs } from '@/lib/api/hooks'
-import { mockProjects, mockJobs } from '@/lib/mocks'
+import { Skeleton, EmptyState } from '@slideforge/ui'
 
 interface QuickAction {
   label: string
@@ -17,11 +17,8 @@ interface QuickAction {
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
-  const { data: project } = useProject(id)
+  const { data: project, isLoading } = useProject(id)
   const { data: jobs } = useJobs(id)
-
-  const p = project ?? mockProjects.find((x) => x.id === id) ?? mockProjects[0]
-  const displayJobs = jobs ?? mockJobs
 
   const quickActions: QuickAction[] = [
     { label: 'Upload Content', description: 'Add slides, docs, or recordings', icon: <Upload className="w-5 h-5" />, href: `/projects/${id}/upload` },
@@ -39,13 +36,33 @@ export default function ProjectDetailPage() {
     draft: { label: 'Draft', dot: 'bg-text-faint' },
     error: { label: 'Error', dot: 'bg-error' },
   }
-  const status = statusMap[p.status]
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col h-full p-6 gap-4">
+        <Skeleton className="h-10 w-64" />
+        <Skeleton className="h-32 w-full" />
+      </div>
+    )
+  }
+
+  if (!project) {
+    return (
+      <EmptyState
+        title="Project not found"
+        description="This project may have been deleted or you may not have access."
+        action={<button onClick={() => router.push('/projects')} className="text-accent text-sm">Back to projects</button>}
+      />
+    )
+  }
+
+  const status = statusMap[project.status]
+  const displayJobs = jobs ?? []
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <TopBar />
       <div className="flex-1 overflow-y-auto px-6 py-6">
-        {/* Header */}
         <div className="mb-8">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
@@ -53,8 +70,8 @@ export default function ProjectDetailPage() {
                 <span className={`w-2 h-2 rounded-full ${status.dot}`} />
                 <span className="text-xs text-text-muted">{status.label}</span>
               </div>
-              <h1 className="font-display text-3xl text-text leading-tight mb-2">{p.name}</h1>
-              {p.description && <p className="text-text-muted text-sm max-w-xl">{p.description}</p>}
+              <h1 className="font-display text-3xl text-text leading-tight mb-2">{project.name}</h1>
+              {project.description && <p className="text-text-muted text-sm max-w-xl">{project.description}</p>}
             </div>
             <button className="flex items-center gap-2 h-8 px-3 border border-border rounded-lg text-xs text-text-muted hover:text-text hover:bg-surface-2 transition-colors shrink-0">
               <Edit2 className="w-3.5 h-3.5" />
@@ -63,15 +80,14 @@ export default function ProjectDetailPage() {
           </div>
 
           <div className="flex items-center gap-6 mt-4 text-xs text-text-faint">
-            <span>{p.slideCount} slides</span>
+            <span>{project.slideCount} slides</span>
             <span className="flex items-center gap-1">
               <Clock className="w-3.5 h-3.5" />
-              Updated {new Date(p.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+              Updated {new Date(project.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
             </span>
           </div>
         </div>
 
-        {/* Quick actions grid */}
         <div className="mb-8">
           <h2 className="text-sm font-semibold text-text mb-4">Project Tools</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
@@ -95,7 +111,6 @@ export default function ProjectDetailPage() {
           </div>
         </div>
 
-        {/* Jobs status */}
         {displayJobs.length > 0 && (
           <div>
             <div className="flex items-center justify-between mb-3">

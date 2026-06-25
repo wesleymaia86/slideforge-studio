@@ -10,7 +10,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@slideforge/ui": "*",
+    "@slideforge/ui": "workspace:*",
     "@tanstack/react-query": "^5.45.0",
     "@tanstack/react-query-devtools": "^5.45.0",
     "framer-motion": "^11.3.2",

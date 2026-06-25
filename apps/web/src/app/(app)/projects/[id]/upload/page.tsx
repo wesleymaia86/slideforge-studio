@@ -4,7 +4,8 @@ import { useState, useCallback, useRef } from 'react'
 import { useParams } from 'next/navigation'
 import { Upload, File, X, CheckCircle, AlertCircle, FileVideo, FileText, FileImage, Loader2 } from 'lucide-react'
 import { TopBar } from '@/components/layout/TopBar'
-import { useUploads } from '@/lib/api/hooks'
+import { useUploads, useUploadFile } from '@/lib/api/hooks'
+import { EmptyState, Progress } from '@slideforge/ui'
 
 interface FileItem {
   id: string
@@ -31,10 +32,27 @@ function FileIcon({ mimeType }: { mimeType: string }) {
 
 export default function UploadPage() {
   const { id } = useParams<{ id: string }>()
-  const { data: uploads } = useUploads(id)
+  const { data: uploads, isLoading } = useUploads(id)
+  const uploadFile = useUploadFile(id)
   const [files, setFiles] = useState<FileItem[]>([])
   const [dragging, setDragging] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  const uploadOne = useCallback(async (fileId: string, file: File) => {
+    setFiles((prev) => prev.map((f) => (f.id === fileId ? { ...f, status: 'uploading', progress: 10 } : f)))
+    try {
+      await uploadFile.mutateAsync(file)
+      setFiles((prev) => prev.map((f) => (f.id === fileId ? { ...f, status: 'done', progress: 100 } : f)))
+    } catch (err) {
+      setFiles((prev) =>
+        prev.map((f) =>
+          f.id === fileId
+            ? { ...f, status: 'error', error: err instanceof Error ? err.message : 'Upload failed' }
+            : f,
+        ),
+      )
+    }
+  }, [uploadFile])
 
   const addFiles = useCallback((incoming: File[]) => {
     const newItems: FileItem[] = incoming.map((f) => ({
@@ -44,23 +62,8 @@ export default function UploadPage() {
       progress: 0,
     }))
     setFiles((prev) => [...prev, ...newItems])
-    // Simulate upload for demo
-    newItems.forEach((item) => simulateUpload(item.id))
-  }, [])
-
-  const simulateUpload = (fileId: string) => {
-    setFiles((prev) => prev.map((f) => f.id === fileId ? { ...f, status: 'uploading' } : f))
-    let progress = 0
-    const interval = setInterval(() => {
-      progress += Math.random() * 20 + 5
-      if (progress >= 100) {
-        clearInterval(interval)
-        setFiles((prev) => prev.map((f) => f.id === fileId ? { ...f, status: 'done', progress: 100 } : f))
-      } else {
-        setFiles((prev) => prev.map((f) => f.id === fileId ? { ...f, progress: Math.min(progress, 95) } : f))
-      }
-    }, 300)
-  }
+    newItems.forEach((item) => void uploadOne(item.id, item.file))
+  }, [uploadOne])
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -69,7 +72,7 @@ export default function UploadPage() {
     if (dropped.length > 0) addFiles(dropped)
   }, [addFiles])
 
-  const removeFile = (id: string) => setFiles((prev) => prev.filter((f) => f.id !== id))
+  const removeFile = (fileId: string) => setFiles((prev) => prev.filter((f) => f.id !== fileId))
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -80,7 +83,6 @@ export default function UploadPage() {
           <p className="text-text-muted text-sm">Add slides, documents, videos, or audio recordings to your project.</p>
         </div>
 
-        {/* Drop zone */}
         <div
           onDragEnter={() => setDragging(true)}
           onDragLeave={() => setDragging(false)}
@@ -88,16 +90,14 @@ export default function UploadPage() {
           onDrop={handleDrop}
           onClick={() => inputRef.current?.click()}
           className={`relative rounded-2xl border-2 border-dashed transition-all cursor-pointer p-12 text-center mb-6 ${
-            dragging
-              ? 'border-accent bg-accent/5'
-              : 'border-border hover:border-border-strong hover:bg-surface-2'
+            dragging ? 'border-accent bg-accent/5' : 'border-border hover:border-border-strong hover:bg-surface-2'
           }`}
         >
           <input
             ref={inputRef}
             type="file"
             multiple
-            accept=".pptx,.ppt,.pdf,.mp4,.mov,.mp3,.wav,.jpg,.jpeg,.png"
+            accept=".pptx,.ppt,.pdf,.mp4,.mov,.mp3,.wav,.jpg,.jpeg,.png,.xlsx,.csv,.docx"
             className="hidden"
             onChange={(e) => {
               if (e.target.files) addFiles(Array.from(e.target.files))
@@ -109,12 +109,9 @@ export default function UploadPage() {
           <p className={`font-medium text-sm mb-1 transition-colors ${dragging ? 'text-accent' : 'text-text'}`}>
             {dragging ? 'Drop files here' : 'Drop files or click to browse'}
           </p>
-          <p className="text-xs text-text-muted">
-            PPTX, PDF, MP4, MOV, MP3, WAV, JPG, PNG — up to 500 MB per file
-          </p>
+          <p className="text-xs text-text-muted">PPTX, PDF, XLSX, DOCX, MP4, images — up to 50 MB per file</p>
         </div>
 
-        {/* File list */}
         {files.length > 0 && (
           <div className="space-y-2 mb-6">
             <h2 className="text-sm font-semibold text-text mb-3">Uploading</h2>
@@ -124,14 +121,8 @@ export default function UploadPage() {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-text truncate">{item.file.name}</p>
                   <p className="text-xs text-text-muted">{formatSize(item.file.size)}</p>
-                  {item.status === 'uploading' && (
-                    <div className="mt-1.5 w-full bg-surface-3 rounded-full h-1">
-                      <div
-                        className="h-full rounded-full bg-accent transition-all duration-300"
-                        style={{ width: `${item.progress}%` }}
-                      />
-                    </div>
-                  )}
+                  {item.status === 'uploading' && <Progress value={item.progress} size="sm" className="mt-1.5" />}
+                  {item.error && <p className="text-xs text-error mt-1">{item.error}</p>}
                 </div>
                 <div className="shrink-0">
                   {item.status === 'pending' && <div className="w-2 h-2 rounded-full bg-text-faint" />}
@@ -149,10 +140,9 @@ export default function UploadPage() {
           </div>
         )}
 
-        {/* Uploaded files */}
         {(uploads?.length ?? 0) > 0 && (
           <div>
-            <h2 className="text-sm font-semibold text-text mb-3">Project Files</h2>
+            <h2 className="text-sm font-semibold text-text mb-3">Workspace Files</h2>
             <div className="space-y-2">
               {uploads!.map((upload) => (
                 <div key={upload.id} className="flex items-center gap-4 px-4 py-3 bg-surface rounded-xl border border-border">
@@ -168,10 +158,13 @@ export default function UploadPage() {
           </div>
         )}
 
-        {files.length === 0 && !uploads?.length && (
-          <div className="text-center py-8 text-text-faint text-sm">
-            No files uploaded yet. Drop some files above to get started.
-          </div>
+        {!isLoading && files.length === 0 && !uploads?.length && (
+          <EmptyState
+            compact
+            icon={<Upload className="w-6 h-6" />}
+            title="No files uploaded yet"
+            description="Drop files above to enqueue processing jobs."
+          />
         )}
       </div>
     </div>

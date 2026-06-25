@@ -18,18 +18,19 @@ export default function LoginPage() {
     setLoading(true)
     setError('')
 
-    const result = await signIn('credentials', {
-      email,
-      password,
-      redirect: false,
-    })
-
-    setLoading(false)
-
-    if (result?.error) {
-      setError('Invalid credentials. Try demo@slideforge.io / demo')
-    } else {
-      router.replace('/dashboard')
+    try {
+      await signIn('credentials', {
+        email,
+        password,
+        redirectTo: '/dashboard',
+      })
+    } catch (err: unknown) {
+      setLoading(false)
+      // NextAuth throws a redirect — let it happen
+      const isRedirect = err && typeof err === 'object' && 'digest' in err && String((err as {digest?: string}).digest).includes('NEXT_REDIRECT')
+      if (!isRedirect) {
+        setError('Invalid credentials. Try demo@slideforge.io / demo')
+      }
     }
   }
 

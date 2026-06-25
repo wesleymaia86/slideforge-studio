@@ -1,5 +1,16 @@
-// Placeholder — frontend agent will populate this with actual components.
-// Example exports once implemented:
-// export { Button } from "./Button/Button";
-// export { Badge } from "./Badge/Badge";
-// export { SlideCanvas } from "./SlideCanvas/SlideCanvas";
+export { Button } from './Button'
+export { Input } from './Input'
+export { Card, CardHeader, CardTitle, CardBody } from './Card'
+export {
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarFooter,
+  SidebarSection,
+  SidebarItem,
+} from './Sidebar'
+export { Skeleton, CardSkeleton } from './Skeleton'
+export { Badge } from './Badge'
+export { Progress } from './Progress'
+export { EmptyState } from './EmptyState'
+export { SlideFilmstrip, SlideCanvas } from './SlidePreview'

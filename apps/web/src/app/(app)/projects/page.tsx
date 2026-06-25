@@ -1,12 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Plus, FolderKanban, Search, X, SlidersHorizontal, ArrowRight, Clock } from 'lucide-react'
+import { Plus, FolderKanban, Search, X, Clock } from 'lucide-react'
 import { TopBar } from '@/components/layout/TopBar'
-import { useProjects, useCreateProject } from '@/lib/api/hooks'
+import { useProjects, useCreateProject, useWorkspaces } from '@/lib/api/hooks'
 import { useAppStore } from '@/lib/store'
-import { mockProjects, mockWorkspaces } from '@/lib/mocks'
+import { Button, EmptyState, Skeleton, Input } from '@slideforge/ui'
 import type { Project } from '@/lib/api/types'
 
 const statusConfig = {
@@ -25,7 +25,6 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
       onClick={onClick}
       className="w-full text-left bg-surface rounded-xl border border-border hover:border-border-strong hover:bg-surface-2 transition-all group flex flex-col"
     >
-      {/* Slide mini-preview */}
       <div className="relative w-full rounded-t-xl overflow-hidden border-b border-border" style={{ aspectRatio: '16/9', background: 'hsl(220 15% 10%)' }}>
         {project.thumbnailUrl ? (
           <img src={project.thumbnailUrl} alt={project.name} className="w-full h-full object-cover" />
@@ -40,14 +39,6 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
             ))}
           </div>
         )}
-        {/* Grain */}
-        <div
-          className="absolute inset-0 opacity-[0.035]"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
-            backgroundSize: '64px',
-          }}
-        />
       </div>
 
       <div className="p-4 flex-1 flex flex-col gap-2">
@@ -75,13 +66,18 @@ function ProjectCard({ project, onClick }: { project: Project; onClick: () => vo
 function CreateProjectModal({ onClose, workspaceId }: { onClose: () => void; workspaceId?: string }) {
   const [name, setName] = useState('')
   const [desc, setDesc] = useState('')
-  const [wsId, setWsId] = useState(workspaceId ?? mockWorkspaces[0]?.id ?? '')
+  const { data: workspaces } = useWorkspaces()
+  const [wsId, setWsId] = useState(workspaceId ?? '')
   const create = useCreateProject()
   const router = useRouter()
+  const setWorkspace = useAppStore((s) => s.setWorkspace)
+
+  const effectiveWsId = wsId || workspaces?.[0]?.id || ''
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const project = await create.mutateAsync({ name, workspaceId: wsId, description: desc || undefined })
+    const project = await create.mutateAsync({ name, workspaceId: effectiveWsId, description: desc || undefined })
+    setWorkspace(effectiveWsId)
     onClose()
     router.push(`/projects/${project.id}`)
   }
@@ -97,16 +93,7 @@ function CreateProjectModal({ onClose, workspaceId }: { onClose: () => void; wor
           </button>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-text-muted">Project Name</label>
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              placeholder="Q3 Investor Deck"
-              className="w-full h-10 bg-surface-2 border border-border rounded-[10px] px-3 text-sm text-text placeholder:text-text-faint focus:outline-none focus:border-accent/50 focus:ring-2 focus:ring-accent/10 transition-colors"
-            />
-          </div>
+          <Input label="Project Name" value={name} onChange={(e) => setName(e.target.value)} required placeholder="Q3 Investor Deck" />
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-text-muted">Description <span className="text-text-faint">(optional)</span></label>
             <textarea
@@ -120,26 +107,20 @@ function CreateProjectModal({ onClose, workspaceId }: { onClose: () => void; wor
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-text-muted">Workspace</label>
             <select
-              value={wsId}
+              value={effectiveWsId}
               onChange={(e) => setWsId(e.target.value)}
               className="w-full h-10 bg-surface-2 border border-border rounded-[10px] px-3 text-sm text-text focus:outline-none focus:border-accent/50 focus:ring-2 focus:ring-accent/10 transition-colors"
             >
-              {mockWorkspaces.map((ws) => (
+              {(workspaces ?? []).map((ws) => (
                 <option key={ws.id} value={ws.id}>{ws.name}</option>
               ))}
             </select>
           </div>
           <div className="flex gap-3 pt-1">
-            <button type="button" onClick={onClose} className="flex-1 h-9 border border-border rounded-[10px] text-sm text-text-muted hover:text-text hover:bg-surface-2 transition-colors">
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={create.isPending || !name}
-              className="flex-1 h-9 bg-accent text-[#0C0D0F] font-semibold text-sm rounded-[10px] hover:bg-accent-light transition-colors shadow-amber-sm disabled:opacity-60"
-            >
-              {create.isPending ? 'Creating…' : 'Create Project'}
-            </button>
+            <Button type="button" variant="secondary" className="flex-1" onClick={onClose}>Cancel</Button>
+            <Button type="submit" variant="primary" className="flex-1" loading={create.isPending} disabled={!name || !effectiveWsId}>
+              Create Project
+            </Button>
           </div>
         </form>
       </div>
@@ -148,30 +129,45 @@ function CreateProjectModal({ onClose, workspaceId }: { onClose: () => void; wor
 }
 
 export default function ProjectsPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex flex-col h-full p-6 gap-4">
+        <Skeleton className="h-10 w-48" />
+        <Skeleton className="h-48" />
+      </div>
+    }>
+      <ProjectsPageContent />
+    </Suspense>
+  )
+}
+
+function ProjectsPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const workspaceId = searchParams.get('workspaceId') ?? undefined
   const { data: projects, isLoading } = useProjects(workspaceId)
+  const setWorkspace = useAppStore((s) => s.setWorkspace)
   const [search, setSearch] = useState('')
   const [showCreate, setShowCreate] = useState(false)
 
-  const display = (projects ?? mockProjects).filter(
+  const display = (projects ?? []).filter(
     (p) =>
       (!workspaceId || p.workspaceId === workspaceId) &&
       (!search || p.name.toLowerCase().includes(search.toLowerCase())),
   )
 
+  const openProject = (project: Project) => {
+    setWorkspace(project.workspaceId)
+    router.push(`/projects/${project.id}`)
+  }
+
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <TopBar
         actions={
-          <button
-            onClick={() => setShowCreate(true)}
-            className="flex items-center gap-2 h-8 px-3 bg-accent text-[#0C0D0F] text-xs font-semibold rounded-lg hover:bg-accent-light transition-colors shadow-amber-sm"
-          >
-            <Plus className="w-3.5 h-3.5" />
+          <Button variant="primary" size="sm" onClick={() => setShowCreate(true)} leftIcon={<Plus className="w-3.5 h-3.5" />}>
             New Project
-          </button>
+          </Button>
         }
       />
 
@@ -181,45 +177,38 @@ export default function ProjectsPage() {
             <h1 className="font-display text-2xl text-text mb-1">Projects</h1>
             <p className="text-text-muted text-sm">{display.length} project{display.length !== 1 ? 's' : ''}</p>
           </div>
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-faint" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search projects…"
-              className="h-9 pl-8 pr-4 bg-surface-2 border border-border rounded-[10px] text-sm text-text placeholder:text-text-faint focus:outline-none focus:border-accent/50 focus:ring-2 focus:ring-accent/10 transition-colors w-56"
-            />
-          </div>
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search projects…"
+            leftElement={<Search className="w-3.5 h-3.5" />}
+            className="w-56"
+          />
         </div>
 
-        {display.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-surface-2 border border-border flex items-center justify-center text-text-faint mb-4">
-              <FolderKanban className="w-7 h-7" />
-            </div>
-            <p className="font-medium text-text mb-1">{search ? 'No projects found' : 'No projects yet'}</p>
-            <p className="text-sm text-text-muted max-w-sm mb-5">
-              {search ? 'Try a different search term.' : 'Create your first project to start building presentations.'}
-            </p>
-            {!search && (
-              <button
-                onClick={() => setShowCreate(true)}
-                className="flex items-center gap-2 h-9 px-4 bg-accent text-[#0C0D0F] font-semibold text-sm rounded-[10px] hover:bg-accent-light transition-colors shadow-amber"
-              >
-                <Plus className="w-4 h-4" />
-                New Project
-              </button>
-            )}
+        {isLoading ? (
+          <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            <Skeleton className="h-48" />
+            <Skeleton className="h-48" />
+            <Skeleton className="h-48" />
           </div>
+        ) : display.length === 0 ? (
+          <EmptyState
+            icon={<FolderKanban className="w-7 h-7" />}
+            title={search ? 'No projects found' : 'No projects yet'}
+            description={search ? 'Try a different search term.' : 'Create your first project to start building presentations.'}
+            action={
+              !search ? (
+                <Button variant="primary" onClick={() => setShowCreate(true)} leftIcon={<Plus className="w-4 h-4" />}>
+                  New Project
+                </Button>
+              ) : undefined
+            }
+          />
         ) : (
           <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
             {display.map((project) => (
-              <ProjectCard
-                key={project.id}
-                project={project}
-                onClick={() => router.push(`/projects/${project.id}`)}
-              />
+              <ProjectCard key={project.id} project={project} onClick={() => openProject(project)} />
             ))}
           </div>
         )}

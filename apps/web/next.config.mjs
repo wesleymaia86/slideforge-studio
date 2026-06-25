@@ -1,6 +1,5 @@
-import type { NextConfig } from 'next'
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   transpilePackages: ['@slideforge/ui'],
   images: {
     remotePatterns: [
@@ -8,7 +7,7 @@ const nextConfig: NextConfig = {
     ],
   },
   experimental: {
-    optimizePackageImports: ['lucide-react', '@slideforge/ui'],
+    optimizePackageImports: ['lucide-react'],
   },
 }
 

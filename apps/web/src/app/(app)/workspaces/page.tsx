@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Plus, Building2, Users, FolderKanban, Crown, ArrowRight, X } from 'lucide-react'
 import { TopBar } from '@/components/layout/TopBar'
 import { useWorkspaces, useCreateWorkspace } from '@/lib/api/hooks'
-import { mockWorkspaces } from '@/lib/mocks'
+import { Button, EmptyState, Skeleton, Input } from '@slideforge/ui'
 import type { Workspace } from '@/lib/api/types'
 
 const planBadge: Record<Workspace['plan'], string> = {
@@ -41,37 +41,13 @@ function CreateWorkspaceModal({ onClose }: { onClose: () => void }) {
           </button>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-text-muted">Workspace Name</label>
-            <input
-              value={name}
-              onChange={(e) => handleNameChange(e.target.value)}
-              required
-              placeholder="Acme Corp"
-              className="w-full h-10 bg-surface-2 border border-border rounded-[10px] px-3 text-sm text-text placeholder:text-text-faint focus:outline-none focus:border-accent/50 focus:ring-2 focus:ring-accent/10 transition-colors"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-medium text-text-muted">Slug</label>
-            <input
-              value={slug}
-              onChange={(e) => setSlug(e.target.value)}
-              required
-              placeholder="acme-corp"
-              className="w-full h-10 bg-surface-2 border border-border rounded-[10px] px-3 text-sm text-text placeholder:text-text-faint font-mono focus:outline-none focus:border-accent/50 focus:ring-2 focus:ring-accent/10 transition-colors"
-            />
-          </div>
+          <Input label="Workspace Name" value={name} onChange={(e) => handleNameChange(e.target.value)} required placeholder="Acme Corp" />
+          <Input label="Slug" value={slug} onChange={(e) => setSlug(e.target.value)} required placeholder="acme-corp" className="font-mono" />
           <div className="flex gap-3 pt-1">
-            <button type="button" onClick={onClose} className="flex-1 h-9 border border-border rounded-[10px] text-sm text-text-muted hover:text-text hover:bg-surface-2 transition-colors">
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={create.isPending || !name}
-              className="flex-1 h-9 bg-accent text-[#0C0D0F] font-semibold text-sm rounded-[10px] hover:bg-accent-light transition-colors shadow-amber-sm disabled:opacity-60"
-            >
-              {create.isPending ? 'Creating…' : 'Create'}
-            </button>
+            <Button type="button" variant="secondary" className="flex-1" onClick={onClose}>Cancel</Button>
+            <Button type="submit" variant="primary" className="flex-1" loading={create.isPending} disabled={!name}>
+              Create
+            </Button>
           </div>
         </form>
       </div>
@@ -83,19 +59,15 @@ export default function WorkspacesPage() {
   const router = useRouter()
   const { data: workspaces, isLoading } = useWorkspaces()
   const [showCreate, setShowCreate] = useState(false)
-  const display = workspaces ?? mockWorkspaces
+  const display = workspaces ?? []
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <TopBar
         actions={
-          <button
-            onClick={() => setShowCreate(true)}
-            className="flex items-center gap-2 h-8 px-3 bg-accent text-[#0C0D0F] text-xs font-semibold rounded-lg hover:bg-accent-light transition-colors shadow-amber-sm"
-          >
-            <Plus className="w-3.5 h-3.5" />
+          <Button variant="primary" size="sm" onClick={() => setShowCreate(true)} leftIcon={<Plus className="w-3.5 h-3.5" />}>
             New Workspace
-          </button>
+          </Button>
         }
       />
 
@@ -105,23 +77,22 @@ export default function WorkspacesPage() {
           <p className="text-text-muted text-sm">Organize your projects and collaborate with your team.</p>
         </div>
 
-        {display.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-surface-2 border border-border flex items-center justify-center text-text-faint mb-4">
-              <Building2 className="w-7 h-7" />
-            </div>
-            <p className="font-medium text-text mb-1">No workspaces yet</p>
-            <p className="text-sm text-text-muted max-w-sm mb-5">
-              Create a workspace to start organizing your projects and invite your team.
-            </p>
-            <button
-              onClick={() => setShowCreate(true)}
-              className="flex items-center gap-2 h-9 px-4 bg-accent text-[#0C0D0F] font-semibold text-sm rounded-[10px] hover:bg-accent-light transition-colors shadow-amber"
-            >
-              <Plus className="w-4 h-4" />
-              Create Workspace
-            </button>
+        {isLoading ? (
+          <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            <Skeleton className="h-40" />
+            <Skeleton className="h-40" />
           </div>
+        ) : display.length === 0 ? (
+          <EmptyState
+            icon={<Building2 className="w-7 h-7" />}
+            title="No workspaces yet"
+            description="Create a workspace to start organizing your projects and invite your team."
+            action={
+              <Button variant="primary" onClick={() => setShowCreate(true)} leftIcon={<Plus className="w-4 h-4" />}>
+                Create Workspace
+              </Button>
+            }
+          />
         ) : (
           <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
             {display.map((ws) => (
