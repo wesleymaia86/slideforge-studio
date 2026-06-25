@@ -17,7 +17,23 @@
 | `slideforge-worker` application | ⚠ Needs GitHub App UUID | See manual steps below |
 | `slideforge-web` application | ⚠ Needs GitHub App UUID | See manual steps below |
 
-### Manual Step: Get GitHub App UUID
+### MCP deploy attempt (2026-06-25, post-push `f1ed101`)
+
+`create_private_gh` was called for `slideforge-api` — **blocked**:
+
+```
+Validation failed: github_app_uuid — The github app uuid field is required.
+```
+
+No application UUIDs exist yet. Databases are ready:
+
+| Resource | UUID |
+|----------|------|
+| SLIDEFORGE project | `cpngzeky5yur0aan0mo68hh7` |
+| slideforge-postgres | `grolg1c581tybkg809mzg24c` |
+| slideforge-redis | `q9wu221pcsxaixgf2zns6wvj` |
+
+### Manual steps (required)
 
 The `create_private_gh` MCP operation requires `github_app_uuid`, which is not exposed by the MCP tool list. Find it:
 
@@ -46,13 +62,13 @@ The `create_private_gh` MCP operation requires `github_app_uuid`, which is not e
     "name": "slideforge-api",
     "fqdn": "https://api-slideforge.byterush.com.br",
     "health_check_enabled": true,
-    "health_check_path": "/health",
+    "health_check_path": "/api/v1/health",
     "health_check_port": "3001"
   }
 }
 ```
 
-Repeat similarly for `worker` (`base_directory: /apps/worker`, `ports_exposes: 8000`, no FQDN) and `web` (`base_directory: /apps/web`, `ports_exposes: 3000`, `fqdn: https://studio.byterush.com.br`).
+Repeat similarly for `worker` (`base_directory: /apps/worker`, `ports_exposes: 8000`, `health_check_path: /health`, no FQDN) and `web` (`base_directory: /apps/web`, `ports_exposes: 3000`, `health_check_path: /`, `fqdn: https://studio.byterush.com.br`).
 
 ### Internal connection strings (set as env vars in each application)
 
@@ -127,7 +143,7 @@ PORT=3000
 
 ```env
 NODE_ENV=production
-PORT=4000
+PORT=3001
 
 # Database
 DATABASE_URL=postgresql://slideforge:<PASSWORD>@<DB_HOST>:5432/slideforge

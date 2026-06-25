@@ -1,6 +1,38 @@
 # SlideForge Studio
 
-AI-powered presentation builder. Monorepo with NestJS API + Python worker.
+AI-powered presentation builder. Monorepo with NestJS API, Next.js web, and Python worker.
+
+## Delivery status (2026-06-25)
+
+**Pushed commits on `main`:**
+
+| SHA | Message |
+|-----|---------|
+| `d16cfd4` | feat(api): JWT auth guards, service hardening, security docs |
+| `e09c9ab` | feat(db): Prisma schema, initial migration, worker config |
+| `f1ed101` | feat(web): Next.js UI wired to API, shared UI components |
+
+Remote: https://github.com/wesleymaia86/slideforge-studio (`main` @ `f1ed101`)
+
+### Functional vs stubbed
+
+| Area | Status | Notes |
+|------|--------|-------|
+| Auth (email/password, JWT) | **Functional** | Register, login, `/auth/me`, global JWT guard + `@Public()` |
+| Workspaces CRUD | **Functional** | API + web pages wired via React Query |
+| Projects / decks / slides | **Functional** | CRUD + editor/outline pages |
+| File upload + processing jobs | **Functional** | Multipart upload → BullMQ queue → worker callbacks |
+| Worker parsing (xlsx/csv/pdf/docx) | **Functional** | Celery + FastAPI health on port 8000 |
+| Brand kits | **Functional** | CRUD API + controllers |
+| Briefing + AI outline | **Partial** | Endpoints exist; AI client stub, needs provider keys |
+| Insights | **Partial** | Worker generates basic insights; UI lists them |
+| Export jobs | **Stubbed** | API creates records; no PPTX/PDF renderer yet |
+| Magic link / Google / Microsoft OAuth | **Stubbed** | Routes return placeholder responses |
+| Stripe billing | **Stubbed** | Env schema only |
+| Admin panel | **Functional** | Super-admin stats/users/workspaces (API + web) |
+| Prisma migrations | **Ready** | `prisma/migrations/20250625180000_init/` — run against Postgres |
+| Coolify deploy | **Blocked** | Project + DB + Redis created; apps need GitHub App UUID (see `docs/coolify.md`) |
+| API production start | **Needs fix** | `nest build` emits `dist/apps/api/src/main.js`; start script expects `dist/main` |
 
 ## Stack
 
@@ -16,26 +48,38 @@ AI-powered presentation builder. Monorepo with NestJS API + Python worker.
 ## Quick start
 
 ```bash
-# 1. Start infrastructure
-docker-compose up -d postgres redis minio
+# 1. Start infrastructure (requires Docker)
+docker compose up -d postgres redis minio
 
 # 2. Install dependencies
-npm install
+pnpm install
 
-# 3. Generate Prisma client + run migrations
-npm run prisma:generate
-npm run prisma:migrate
+# 3. Copy env templates
+cp .env.example .env
+cp apps/api/.env.example apps/api/.env   # or merge into root .env
+cp apps/web/.env.example apps/web/.env.local
 
-# 4. Start API
-cd apps/api && npm run dev
+# 4. Generate Prisma client + run migrations
+pnpm db:generate
+pnpm db:migrate:deploy   # production / CI
+# or: pnpm db:migrate     # interactive dev
 
-# 5. Start worker (separate terminal)
+# 5. Start API
+pnpm --filter @slideforge/api dev
+
+# 6. Start web (separate terminal)
+pnpm --filter @slideforge/web dev
+
+# 7. Start worker (separate terminal)
 cd apps/worker
 pip install -r requirements.txt
 celery -A celery_app.celery_app worker --loglevel=info --queues=processing
 # Or run the FastAPI health server:
 uvicorn main:app --reload --port 8000
 ```
+
+> **No Docker on this machine?** Install Docker Desktop, then run the commands above. Migration only:
+> `pnpm db:generate && pnpm db:migrate:deploy` with `DATABASE_URL` pointing at your Postgres instance.
 
 ## Environment
 
