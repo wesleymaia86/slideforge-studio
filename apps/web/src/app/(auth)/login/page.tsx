@@ -29,7 +29,7 @@ export default function LoginPage() {
       // NextAuth throws a redirect — let it happen
       const isRedirect = err && typeof err === 'object' && 'digest' in err && String((err as {digest?: string}).digest).includes('NEXT_REDIRECT')
       if (!isRedirect) {
-        setError('Invalid credentials. Try demo@slideforge.io / demo')
+        setError('Credenciais inválidas. Tente demo@slideforge.io / demo')
       }
     }
   }
@@ -56,18 +56,18 @@ export default function LoginPage() {
           </div>
 
           <h1 className="font-display text-4xl text-text leading-tight mb-4">
-            Intelligence that<br />
-            <span className="gradient-text-amber italic">shapes</span> your story
+            Inteligência que<br />
+            <span className="gradient-text-amber italic">molda</span> sua história
           </h1>
           <p className="text-text-muted text-sm leading-relaxed max-w-sm">
-            Transform raw content into compelling presentations. AI-powered analysis, 
-            smart outlines, and production-ready decks — in minutes.
+            Transforme conteúdo bruto em apresentações impactantes. Análise com IA, 
+            roteiros inteligentes e decks prontos para produção — em minutos.
           </p>
         </div>
 
         {/* Slide filmstrip preview */}
         <div className="relative z-10">
-          <p className="text-xs text-text-faint mb-3 uppercase tracking-widest">Recent Projects</p>
+          <p className="text-xs text-text-faint mb-3 uppercase tracking-widest">Projetos Recentes</p>
           <div className="relative">
             {/* Filmstrip sprockets */}
             <div className="h-2 bg-surface-2 border-t border-b border-border flex items-center px-2 gap-2 mb-1">
@@ -77,10 +77,10 @@ export default function LoginPage() {
             </div>
             <div className="flex gap-2 overflow-hidden">
               {[
-                { title: 'Series B Deck', slides: 24, color: 'hsl(220 18% 12%)' },
-                { title: 'Product Roadmap', slides: 18, color: 'hsl(230 16% 11%)' },
-                { title: 'Sales Kickoff', slides: 32, color: 'hsl(215 20% 13%)' },
-                { title: 'AI Conference', slides: 28, color: 'hsl(225 17% 10%)' },
+                { title: 'Deck Série B', slides: 24, color: 'hsl(220 18% 12%)' },
+                { title: 'Roadmap do Produto', slides: 18, color: 'hsl(230 16% 11%)' },
+                { title: 'Kickoff de Vendas', slides: 32, color: 'hsl(215 20% 13%)' },
+                { title: 'Conferência de IA', slides: 28, color: 'hsl(225 17% 10%)' },
               ].map((p, i) => (
                 <div
                   key={i}
@@ -128,13 +128,13 @@ export default function LoginPage() {
             <span className="font-display text-base text-text">SlideForge Studio</span>
           </div>
 
-          <h2 className="font-display text-2xl text-text mb-1.5">Welcome back</h2>
-          <p className="text-text-muted text-sm mb-8">Sign in to your workspace</p>
+          <h2 className="font-display text-2xl text-text mb-1.5">Bem-vindo de volta</h2>
+          <p className="text-text-muted text-sm mb-8">Entre no seu workspace</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-text-muted tracking-wide" htmlFor="email">
-                Email
+                E-mail
               </label>
               <input
                 id="email"
@@ -142,14 +142,14 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="you@company.com"
+                placeholder="voce@empresa.com"
                 className="w-full h-10 bg-surface-2 border border-border rounded-[10px] px-3 text-sm text-text placeholder:text-text-faint focus:outline-none focus:border-accent/50 focus:ring-2 focus:ring-accent/10 transition-colors"
               />
             </div>
 
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-text-muted tracking-wide" htmlFor="password">
-                Password
+                Senha
               </label>
               <div className="relative">
                 <input
@@ -189,7 +189,7 @@ export default function LoginPage() {
                 </svg>
               ) : (
                 <>
-                  Sign in
+                  Entrar
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -198,7 +198,7 @@ export default function LoginPage() {
 
           <div className="mt-6 pt-6 border-t border-border">
             <p className="text-xs text-text-faint text-center">
-              Demo credentials: <span className="text-text-muted font-mono">demo@slideforge.io</span> / <span className="text-text-muted font-mono">demo</span>
+              Credenciais demo: <span className="text-text-muted font-mono">demo@slideforge.io</span> / <span className="text-text-muted font-mono">demo</span>
             </p>
           </div>
         </div>

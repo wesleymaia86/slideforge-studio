@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import { Upload, File, X, CheckCircle, AlertCircle, FileVideo, FileText, FileImage, Loader2 } from 'lucide-react'
 import { TopBar } from '@/components/layout/TopBar'
 import { useUploads, useUploadFile } from '@/lib/api/hooks'
+import { t } from '@/lib/i18n'
 import { EmptyState, Progress } from '@slideforge/ui'
 
 interface FileItem {
@@ -47,7 +48,7 @@ export default function UploadPage() {
       setFiles((prev) =>
         prev.map((f) =>
           f.id === fileId
-            ? { ...f, status: 'error', error: err instanceof Error ? err.message : 'Upload failed' }
+            ? { ...f, status: 'error', error: err instanceof Error ? err.message : t('upload.uploadFailed') }
             : f,
         ),
       )
@@ -79,8 +80,8 @@ export default function UploadPage() {
       <TopBar />
       <div className="flex-1 overflow-y-auto px-6 py-6">
         <div className="mb-6">
-          <h1 className="font-display text-2xl text-text mb-1">Upload Center</h1>
-          <p className="text-text-muted text-sm">Add slides, documents, videos, or audio recordings to your project.</p>
+          <h1 className="font-display text-2xl text-text mb-1">{t('nav.upload')}</h1>
+          <p className="text-text-muted text-sm">Adicione slides, documentos, vídeos ou gravações ao projeto.</p>
         </div>
 
         <div
@@ -107,14 +108,14 @@ export default function UploadPage() {
             <Upload className="w-7 h-7" />
           </div>
           <p className={`font-medium text-sm mb-1 transition-colors ${dragging ? 'text-accent' : 'text-text'}`}>
-            {dragging ? 'Drop files here' : 'Drop files or click to browse'}
+            {dragging ? t('upload.dropHere') : t('upload.dropOrBrowse')}
           </p>
-          <p className="text-xs text-text-muted">PPTX, PDF, XLSX, DOCX, MP4, images — up to 50 MB per file</p>
+          <p className="text-xs text-text-muted">{t('upload.supported')}</p>
         </div>
 
         {files.length > 0 && (
           <div className="space-y-2 mb-6">
-            <h2 className="text-sm font-semibold text-text mb-3">Uploading</h2>
+            <h2 className="text-sm font-semibold text-text mb-3">Enviando</h2>
             {files.map((item) => (
               <div key={item.id} className="flex items-center gap-4 px-4 py-3 bg-surface rounded-xl border border-border">
                 <FileIcon mimeType={item.file.type} />
@@ -142,7 +143,7 @@ export default function UploadPage() {
 
         {(uploads?.length ?? 0) > 0 && (
           <div>
-            <h2 className="text-sm font-semibold text-text mb-3">Workspace Files</h2>
+            <h2 className="text-sm font-semibold text-text mb-3">Arquivos do workspace</h2>
             <div className="space-y-2">
               {uploads!.map((upload) => (
                 <div key={upload.id} className="flex items-center gap-4 px-4 py-3 bg-surface rounded-xl border border-border">
@@ -162,8 +163,8 @@ export default function UploadPage() {
           <EmptyState
             compact
             icon={<Upload className="w-6 h-6" />}
-            title="No files uploaded yet"
-            description="Drop files above to enqueue processing jobs."
+            title={t('upload.noFiles')}
+            description={t('upload.noFilesDesc')}
           />
         )}
       </div>

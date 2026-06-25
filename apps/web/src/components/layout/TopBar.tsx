@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronRight, Bell } from 'lucide-react'
 import { cn } from '@slideforge/ui'
+import { t } from '@/lib/i18n'
 
 interface BreadcrumbItem {
   label: string
@@ -17,18 +18,18 @@ interface TopBarProps {
   className?: string
 }
 
-const routeLabels: Record<string, string> = {
-  dashboard: 'Dashboard',
-  workspaces: 'Workspaces',
-  projects: 'Projects',
-  upload: 'Upload',
-  jobs: 'Jobs',
-  insights: 'Insights',
-  briefing: 'Briefing',
-  outline: 'Outline',
-  editor: 'Editor',
-  exports: 'Exports',
-  admin: 'Admin',
+const routeKeys: Record<string, string> = {
+  dashboard: 'nav.dashboard',
+  workspaces: 'nav.workspaces',
+  projects: 'nav.projects',
+  upload: 'nav.upload',
+  jobs: 'nav.jobs',
+  insights: 'nav.insights',
+  briefing: 'nav.briefing',
+  outline: 'nav.outline',
+  editor: 'nav.editor',
+  exports: 'nav.exports',
+  admin: 'nav.admin',
 }
 
 function useBreadcrumbs(): BreadcrumbItem[] {
@@ -37,7 +38,8 @@ function useBreadcrumbs(): BreadcrumbItem[] {
 
   return segments.map((seg, i) => {
     const href = '/' + segments.slice(0, i + 1).join('/')
-    const label = routeLabels[seg] ?? (seg.length > 20 ? seg.slice(0, 12) + '…' : seg)
+    const key = routeKeys[seg]
+    const label = key ? t(key) : seg.length > 20 ? seg.slice(0, 12) + '…' : seg
     return { label, href }
   })
 }

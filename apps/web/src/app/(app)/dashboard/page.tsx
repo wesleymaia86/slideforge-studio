@@ -46,14 +46,14 @@ export default function DashboardPage() {
 
   const firstName = session?.user?.name?.split(' ')[0] ?? 'there'
   const hour = new Date().getHours()
-  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
+  const greeting = hour < 12 ? 'Bom dia' : hour < 17 ? 'Boa tarde' : 'Boa noite'
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <TopBar
         actions={
           <Button variant="primary" size="sm" onClick={() => router.push('/projects')} leftIcon={<Plus className="w-3.5 h-3.5" />}>
-            New Project
+            Novo Projeto
           </Button>
         }
       />
@@ -63,46 +63,46 @@ export default function DashboardPage() {
           <h1 className="font-display text-3xl text-text mb-1">
             {greeting}, <span className="gradient-text-amber">{firstName}</span>
           </h1>
-          <p className="text-text-muted text-sm">Here's what's happening in your workspace today.</p>
+          <p className="text-text-muted text-sm">Veja o que está acontecendo no seu workspace hoje.</p>
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <StatCard
             icon={<FolderKanban className="w-5 h-5" />}
-            label="Total Projects"
+            label="Total de Projetos"
             value={projectsLoading ? '—' : String(displayProjects.length)}
-            sub="across all workspaces"
+            sub="em todos os workspaces"
             accent
           />
           <StatCard
             icon={<Cpu className="w-5 h-5" />}
-            label="Jobs Running"
+            label="Processamentos"
             value={String(activeJobs.filter((j) => j.status === 'running').length)}
-            sub="processing now"
+            sub="em execução agora"
           />
           <StatCard
             icon={<BarChart3 className="w-5 h-5" />}
-            label="Insights Generated"
+            label="Insights Gerados"
             value="—"
-            sub="this month"
+            sub="este mês"
           />
           <StatCard
             icon={<TrendingUp className="w-5 h-5" />}
-            label="Slides Created"
+            label="Slides Criados"
             value={String(displayProjects.reduce((a, p) => a + p.slideCount, 0))}
-            sub="total slides"
+            sub="total de slides"
           />
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-3">
             <div className="flex items-center justify-between mb-1">
-              <h2 className="text-sm font-semibold text-text">Recent Projects</h2>
+              <h2 className="text-sm font-semibold text-text">Projetos Recentes</h2>
               <button
                 onClick={() => router.push('/projects')}
                 className="text-xs text-text-muted hover:text-accent transition-colors flex items-center gap-1"
               >
-                View all <ArrowRight className="w-3 h-3" />
+                Ver todos <ArrowRight className="w-3 h-3" />
               </button>
             </div>
             {projectsLoading ? (
@@ -114,11 +114,11 @@ export default function DashboardPage() {
               <EmptyState
                 compact
                 icon={<FolderKanban className="w-6 h-6" />}
-                title="No projects yet"
-                description="Create a project to get started."
+                title="Nenhum projeto ainda"
+                description="Crie um projeto para começar."
                 action={
                   <Button variant="primary" size="sm" onClick={() => router.push('/projects')}>
-                    Browse projects
+                    Ver projetos
                   </Button>
                 }
               />
@@ -138,7 +138,7 @@ export default function DashboardPage() {
                       <StatusDot status={project.status} />
                       <span className="capitalize">{project.status}</span>
                       <span className="text-border mx-1">·</span>
-                      <span>{project.slideCount} slides</span>
+                      <span>{project.slideCount} slide{project.slideCount !== 1 ? 's' : ''}</span>
                     </p>
                   </div>
                   <ArrowRight className="w-4 h-4 text-text-faint opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -148,10 +148,10 @@ export default function DashboardPage() {
           </div>
 
           <div className="space-y-3">
-            <h2 className="text-sm font-semibold text-text mb-1">Active Jobs</h2>
+            <h2 className="text-sm font-semibold text-text mb-1">Processamentos Ativos</h2>
             {activeJobs.length === 0 ? (
               <div className="bg-surface rounded-xl border border-border p-6 text-center">
-                <p className="text-sm text-text-muted">No active jobs</p>
+                <p className="text-sm text-text-muted">Nenhum processamento ativo</p>
               </div>
             ) : (
               activeJobs.slice(0, 5).map((job) => (

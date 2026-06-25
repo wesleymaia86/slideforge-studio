@@ -6,19 +6,26 @@ import { FileText, ChevronRight, ChevronLeft, Check, Plus, X } from 'lucide-reac
 import { TopBar } from '@/components/layout/TopBar'
 import { useBriefing, useSaveBriefing } from '@/lib/api/hooks'
 import { Button } from '@slideforge/ui'
+import { t } from '@/lib/i18n'
 import type { BriefingData } from '@/lib/api/types'
 
 const STEPS = [
-  { id: 'audience', label: 'Audience', description: 'Who is this for?' },
-  { id: 'objective', label: 'Objective', description: "What's the goal?" },
-  { id: 'tone', label: 'Tone & Style', description: 'How should it feel?' },
-  { id: 'messages', label: 'Key Messages', description: 'What must land?' },
-  { id: 'context', label: 'Context', description: 'Setting & constraints' },
+  { id: 'audience', label: t('briefing.audience'), description: t('briefing.audienceDesc') },
+  { id: 'objective', label: t('briefing.objective'), description: t('briefing.objectiveDesc') },
+  { id: 'tone', label: t('briefing.tone'), description: t('briefing.toneDesc') },
+  { id: 'messages', label: t('briefing.messages'), description: t('briefing.messagesDesc') },
+  { id: 'context', label: t('briefing.context'), description: t('briefing.contextDesc') },
 ]
 
 const TONE_OPTIONS = [
-  'Professional', 'Inspiring', 'Data-driven', 'Conversational',
-  'Authoritative', 'Innovative', 'Empathetic', 'Bold',
+  t('briefing.tones.professional'),
+  t('briefing.tones.inspiring'),
+  t('briefing.tones.dataDriven'),
+  t('briefing.tones.conversational'),
+  t('briefing.tones.authoritative'),
+  t('briefing.tones.innovative'),
+  t('briefing.tones.empathetic'),
+  t('briefing.tones.bold'),
 ]
 
 export default function BriefingPage() {
@@ -72,7 +79,7 @@ export default function BriefingPage() {
             loading={save.isPending}
             leftIcon={saved ? <Check className="w-3.5 h-3.5" /> : undefined}
           >
-            {saved ? 'Saved' : save.isPending ? 'Saving…' : 'Save Briefing'}
+            {saved ? t('common.saved') : save.isPending ? t('common.saving') : t('briefing.saveBriefing')}
           </Button>
         }
       />
@@ -81,13 +88,13 @@ export default function BriefingPage() {
           <div className="mb-8">
             <div className="flex items-center gap-2.5 mb-2">
               <FileText className="w-5 h-5 text-accent" />
-              <h1 className="font-display text-2xl text-text">Briefing Wizard</h1>
+              <h1 className="font-display text-2xl text-text">{t('briefing.title')}</h1>
             </div>
-            <p className="text-text-muted text-sm">Help the AI understand your presentation's purpose and context.</p>
+            <p className="text-text-muted text-sm">Ajude a IA a entender o propósito e contexto da sua apresentação.</p>
           </div>
 
           {isLoading ? (
-            <p className="text-sm text-text-muted">Loading briefing…</p>
+            <p className="text-sm text-text-muted">Carregando briefing…</p>
           ) : (
             <>
               <div className="flex items-center gap-1 mb-8">
@@ -119,7 +126,7 @@ export default function BriefingPage() {
                     value={form.audience ?? ''}
                     onChange={(e) => setForm((f) => ({ ...f, audience: e.target.value }))}
                     rows={4}
-                    placeholder="e.g. Series B investors with enterprise SaaS background…"
+                    placeholder={t('briefing.audiencePlaceholder')}
                     className="w-full bg-surface-2 border border-border rounded-xl px-4 py-3 text-sm text-text placeholder:text-text-faint focus:outline-none focus:border-accent/50 focus:ring-2 focus:ring-accent/10 transition-colors resize-none"
                   />
                 )}
@@ -130,11 +137,11 @@ export default function BriefingPage() {
                       value={form.objective ?? ''}
                       onChange={(e) => setForm((f) => ({ ...f, objective: e.target.value }))}
                       rows={3}
-                      placeholder="e.g. Secure $15M Series B…"
+                      placeholder={t('briefing.objectivePlaceholder')}
                       className="w-full bg-surface-2 border border-border rounded-xl px-4 py-3 text-sm text-text placeholder:text-text-faint focus:outline-none focus:border-accent/50 focus:ring-2 focus:ring-accent/10 transition-colors resize-none"
                     />
                     <div className="flex items-center gap-3">
-                      <label className="text-xs text-text-muted shrink-0">Presentation duration</label>
+                      <label className="text-xs text-text-muted shrink-0">Duração da apresentação</label>
                       <input
                         type="number"
                         min={5}
@@ -143,7 +150,7 @@ export default function BriefingPage() {
                         onChange={(e) => setForm((f) => ({ ...f, duration: Number(e.target.value) }))}
                         className="w-24 h-9 bg-surface-2 border border-border rounded-lg px-3 text-sm text-text focus:outline-none focus:border-accent/50 focus:ring-2 focus:ring-accent/10 transition-colors text-center"
                       />
-                      <span className="text-xs text-text-muted">minutes</span>
+                      <span className="text-xs text-text-muted">minutos</span>
                     </div>
                   </div>
                 )}
@@ -171,7 +178,7 @@ export default function BriefingPage() {
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && addMessage()}
-                        placeholder="Type a key message and press Enter…"
+                        placeholder={t('briefing.messagePlaceholder')}
                         className="flex-1 h-9 bg-surface-2 border border-border rounded-[10px] px-3 text-sm text-text placeholder:text-text-faint focus:outline-none focus:border-accent/50 focus:ring-2 focus:ring-accent/10 transition-colors"
                       />
                       <Button variant="primary" size="icon" onClick={addMessage} disabled={!newMessage.trim()}>
@@ -197,7 +204,7 @@ export default function BriefingPage() {
                     value={form.context ?? ''}
                     onChange={(e) => setForm((f) => ({ ...f, context: e.target.value }))}
                     rows={4}
-                    placeholder="e.g. Presenting to 4 investors at our SF office…"
+                    placeholder={t('briefing.contextPlaceholder')}
                     className="w-full bg-surface-2 border border-border rounded-xl px-4 py-3 text-sm text-text placeholder:text-text-faint focus:outline-none focus:border-accent/50 focus:ring-2 focus:ring-accent/10 transition-colors resize-none"
                   />
                 )}
@@ -205,15 +212,15 @@ export default function BriefingPage() {
 
               <div className="flex items-center justify-between">
                 <Button variant="secondary" onClick={() => setStep((s) => s - 1)} disabled={isFirst} leftIcon={<ChevronLeft className="w-4 h-4" />}>
-                  Back
+                  {t('common.back')}
                 </Button>
                 {isLast ? (
                   <Button variant="primary" onClick={handleSave} loading={save.isPending} leftIcon={<Check className="w-4 h-4" />}>
-                    Complete Briefing
+                    {t('briefing.saveBriefing')}
                   </Button>
                 ) : (
                   <Button variant="primary" onClick={() => setStep((s) => s + 1)} rightIcon={<ChevronRight className="w-4 h-4" />}>
-                    Next
+                    Próximo
                   </Button>
                 )}
               </div>

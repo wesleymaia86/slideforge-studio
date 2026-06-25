@@ -6,6 +6,14 @@ export const workerEnvSchema = commonEnvSchema.extend({
   WORKER_MAX_STALLED_COUNT: z.coerce.number().int().default(3),
   WORKER_STALL_INTERVAL_MS: z.coerce.number().int().default(30_000),
 
+  OPENROUTER_API_KEY: z.string().optional(),
+  OPENROUTER_MODEL_QUALIFICACAO: z.string().default("openai/gpt-4o"),
+  OPENROUTER_MODEL_EMBEDDING: z.string().default("openai/text-embedding-3-small"),
+  AI_AGENT_ENABLED: z
+    .string()
+    .transform((v) => v === "true")
+    .default("false"),
+
   OPENAI_API_KEY: z.string().optional(),
   ANTHROPIC_API_KEY: z.string().optional(),
   GOOGLE_AI_API_KEY: z.string().optional(),

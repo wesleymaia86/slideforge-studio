@@ -5,14 +5,15 @@ import { BarChart3, Lightbulb, Tag, MessageSquare, TrendingUp, Sparkles } from '
 import { TopBar } from '@/components/layout/TopBar'
 import { useInsights } from '@/lib/api/hooks'
 import { EmptyState, Progress } from '@slideforge/ui'
+import { t } from '@/lib/i18n'
 import type { Insight } from '@/lib/api/types'
 
 const typeConfig: Record<Insight['type'], { label: string; icon: React.ReactNode; gradient: string }> = {
-  summary: { label: 'Summary', icon: <BarChart3 className="w-4 h-4" />, gradient: 'from-accent/20 to-accent/5' },
-  keyword: { label: 'Keywords', icon: <Tag className="w-4 h-4" />, gradient: 'from-info/20 to-info/5' },
-  sentiment: { label: 'Sentiment', icon: <MessageSquare className="w-4 h-4" />, gradient: 'from-success/20 to-success/5' },
-  topic: { label: 'Topics', icon: <Lightbulb className="w-4 h-4" />, gradient: 'from-warning/20 to-warning/5' },
-  recommendation: { label: 'Recommendation', icon: <TrendingUp className="w-4 h-4" />, gradient: 'from-error/20 to-error/5' },
+  summary: { label: t('insights.summary'), icon: <BarChart3 className="w-4 h-4" />, gradient: 'from-accent/20 to-accent/5' },
+  keyword: { label: t('insights.keywords'), icon: <Tag className="w-4 h-4" />, gradient: 'from-info/20 to-info/5' },
+  sentiment: { label: t('insights.sentiment'), icon: <MessageSquare className="w-4 h-4" />, gradient: 'from-success/20 to-success/5' },
+  topic: { label: t('insights.topics'), icon: <Lightbulb className="w-4 h-4" />, gradient: 'from-warning/20 to-warning/5' },
+  recommendation: { label: t('insights.recommendation'), icon: <TrendingUp className="w-4 h-4" />, gradient: 'from-error/20 to-error/5' },
 }
 
 const typeColor: Record<Insight['type'], string> = {

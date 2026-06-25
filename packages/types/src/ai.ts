@@ -1,4 +1,18 @@
-export type AIProvider = "openai" | "anthropic" | "google" | "azure-openai";
+export type AIProvider =
+  | "openrouter"
+  | "openai"
+  | "anthropic"
+  | "google"
+  | "azure-openai";
+
+/** Perfis de agente roteados via OpenRouter (env OPENROUTER_MODEL_*). */
+export type AgentProfile =
+  | "atendimento"
+  | "triagem"
+  | "qualificacao"
+  | "busca_imoveis"
+  | "handoff"
+  | "embedding";
 
 export interface AIModel {
   provider: AIProvider;

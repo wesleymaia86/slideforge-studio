@@ -4,7 +4,11 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, Building2, Users, FolderKanban, Crown, ArrowRight, X } from 'lucide-react'
 import { TopBar } from '@/components/layout/TopBar'
+import { FormFeedback } from '@/components/FormFeedback'
 import { useWorkspaces, useCreateWorkspace } from '@/lib/api/hooks'
+import { getApiErrorMessage } from '@/lib/api/error-message'
+import { ensureSlug, slugifyName } from '@/lib/slug'
+import { t } from '@/lib/i18n'
 import { Button, EmptyState, Skeleton, Input } from '@slideforge/ui'
 import type { Workspace } from '@/lib/api/types'
 
@@ -17,36 +21,81 @@ const planBadge: Record<Workspace['plan'], string> = {
 function CreateWorkspaceModal({ onClose }: { onClose: () => void }) {
   const [name, setName] = useState('')
   const [slug, setSlug] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   const create = useCreateWorkspace()
+  const router = useRouter()
 
   const handleNameChange = (v: string) => {
     setName(v)
-    setSlug(v.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''))
+    setSlug(slugifyName(v))
+    setError(null)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    await create.mutateAsync({ name, slug })
-    onClose()
+    setError(null)
+    setSuccess(null)
+
+    const finalSlug = ensureSlug(name, slug)
+    if (!name.trim()) return
+
+    try {
+      const ws = await create.mutateAsync({ name: name.trim(), slug: finalSlug })
+      setSuccess(t('workspaces.createSuccess'))
+      setTimeout(() => {
+        onClose()
+        router.push(`/projects?workspaceId=${ws.id}`)
+      }, 600)
+    } catch (err) {
+      setError(getApiErrorMessage(err, t('workspaces.createError')))
+    }
   }
+
+  const canSubmit = Boolean(name.trim()) && Boolean(ensureSlug(name, slug))
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div className="relative z-10 bg-surface border border-border rounded-2xl p-6 w-full max-w-md shadow-card animate-fade-in">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="font-display text-lg text-text">New Workspace</h2>
+          <h2 className="font-display text-lg text-text">{t('workspaces.modalTitle')}</h2>
           <button onClick={onClose} className="text-text-faint hover:text-text transition-colors p-1">
             <X className="w-4 h-4" />
           </button>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Input label="Workspace Name" value={name} onChange={(e) => handleNameChange(e.target.value)} required placeholder="Acme Corp" />
-          <Input label="Slug" value={slug} onChange={(e) => setSlug(e.target.value)} required placeholder="acme-corp" className="font-mono" />
+          <Input
+            label={t('workspaces.nameLabel')}
+            value={name}
+            onChange={(e) => handleNameChange(e.target.value)}
+            required
+            placeholder={t('workspaces.namePlaceholder')}
+          />
+          <Input
+            label={t('workspaces.slugLabel')}
+            value={slug}
+            onChange={(e) => {
+              setSlug(e.target.value)
+              setError(null)
+            }}
+            required
+            placeholder={t('workspaces.slugPlaceholder')}
+            className="font-mono"
+          />
+          <FormFeedback error={error} success={success} />
           <div className="flex gap-3 pt-1">
-            <Button type="button" variant="secondary" className="flex-1" onClick={onClose}>Cancel</Button>
-            <Button type="submit" variant="primary" className="flex-1" loading={create.isPending} disabled={!name}>
-              Create
+            <Button type="button" variant="secondary" className="flex-1" onClick={onClose}>
+              {t('common.cancel')}
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              className="flex-1"
+              loading={create.isPending}
+              disabled={!canSubmit || Boolean(success)}
+            >
+              {t('common.create')}
             </Button>
           </div>
         </form>
@@ -65,16 +114,21 @@ export default function WorkspacesPage() {
     <div className="flex flex-col h-full overflow-hidden">
       <TopBar
         actions={
-          <Button variant="primary" size="sm" onClick={() => setShowCreate(true)} leftIcon={<Plus className="w-3.5 h-3.5" />}>
-            New Workspace
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={() => setShowCreate(true)}
+            leftIcon={<Plus className="w-3.5 h-3.5" />}
+          >
+            {t('workspaces.newWorkspace')}
           </Button>
         }
       />
 
       <div className="flex-1 overflow-y-auto px-6 py-6">
         <div className="mb-6">
-          <h1 className="font-display text-2xl text-text mb-1">Workspaces</h1>
-          <p className="text-text-muted text-sm">Organize your projects and collaborate with your team.</p>
+          <h1 className="font-display text-2xl text-text mb-1">{t('workspaces.title')}</h1>
+          <p className="text-text-muted text-sm">{t('workspaces.subtitle')}</p>
         </div>
 
         {isLoading ? (
@@ -85,11 +139,11 @@ export default function WorkspacesPage() {
         ) : display.length === 0 ? (
           <EmptyState
             icon={<Building2 className="w-7 h-7" />}
-            title="No workspaces yet"
-            description="Create a workspace to start organizing your projects and invite your team."
+            title={t('workspaces.noWorkspaces')}
+            description={t('workspaces.noWorkspacesDesc')}
             action={
               <Button variant="primary" onClick={() => setShowCreate(true)} leftIcon={<Plus className="w-4 h-4" />}>
-                Create Workspace
+                {t('workspaces.createWorkspace')}
               </Button>
             }
           />
@@ -115,11 +169,11 @@ export default function WorkspacesPage() {
                 <div className="flex items-center gap-4 text-xs text-text-muted">
                   <span className="flex items-center gap-1">
                     <FolderKanban className="w-3.5 h-3.5" />
-                    {ws._count?.projects ?? 0} projects
+                    {ws._count?.projects ?? 0} {t('common.projects')}
                   </span>
                   <span className="flex items-center gap-1">
                     <Users className="w-3.5 h-3.5" />
-                    {ws._count?.members ?? 0} members
+                    {ws._count?.members ?? 0} {t('common.members')}
                   </span>
                 </div>
                 <div className="mt-4 flex items-center justify-end">

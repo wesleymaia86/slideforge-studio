@@ -4,15 +4,16 @@ import { useParams } from 'next/navigation'
 import { Cpu, RefreshCw, XCircle, CheckCircle2, Clock, AlertTriangle } from 'lucide-react'
 import { TopBar } from '@/components/layout/TopBar'
 import { useJobs } from '@/lib/api/hooks'
+import { t } from '@/lib/i18n'
 import { EmptyState, Progress, Badge } from '@slideforge/ui'
 import type { Job } from '@/lib/api/types'
 
 const jobTypeLabels: Record<Job['type'], string> = {
-  upload: 'File Upload',
-  transcription: 'Transcription',
-  analysis: 'Content Analysis',
-  generation: 'Deck Generation',
-  export: 'Export',
+  upload: t('jobs.fileUpload'),
+  transcription: t('jobs.transcription'),
+  analysis: t('jobs.analysis'),
+  generation: t('jobs.generation'),
+  export: t('jobs.export'),
 }
 
 const statusConfig = {
@@ -46,21 +47,21 @@ function JobRow({ job }: { job: Job }) {
             </div>
           )}
           <div className="flex items-center gap-4 mt-3 text-[11px] text-text-faint">
-            <span>{new Date(job.createdAt).toLocaleString()}</span>
-            {elapsed && <span>Duration: {elapsed}</span>}
+            <span>{new Date(job.createdAt).toLocaleString('pt-BR')}</span>
+            {elapsed && <span>Duração: {elapsed}</span>}
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {job.status === 'failed' && (
             <button className="flex items-center gap-1.5 h-7 px-2.5 bg-surface-2 border border-border rounded-lg text-xs text-text-muted hover:text-text transition-colors">
               <RefreshCw className="w-3 h-3" />
-              Retry
+              Tentar novamente
             </button>
           )}
           {job.status === 'running' && (
             <button className="flex items-center gap-1.5 h-7 px-2.5 bg-error/10 border border-error/25 rounded-lg text-xs text-error hover:bg-error/20 transition-colors">
               <XCircle className="w-3 h-3" />
-              Cancel
+              Cancelar
             </button>
           )}
         </div>
@@ -88,22 +89,22 @@ export default function JobsPage() {
             className="flex items-center gap-2 h-8 px-3 border border-border rounded-lg text-xs text-text-muted hover:text-text hover:bg-surface-2 transition-colors"
           >
             <RefreshCw className="w-3.5 h-3.5" />
-            Refresh
+            Atualizar
           </button>
         }
       />
       <div className="flex-1 overflow-y-auto px-6 py-6">
         <div className="mb-6">
-          <h1 className="font-display text-2xl text-text mb-1">Processing Jobs</h1>
-          <p className="text-text-muted text-sm">Track AI processing pipelines for your project.</p>
+          <h1 className="font-display text-2xl text-text mb-1">{t('jobs.title')}</h1>
+          <p className="text-text-muted text-sm">Acompanhe pipelines de processamento IA do projeto.</p>
         </div>
 
         <div className="flex items-center gap-4 mb-6 flex-wrap">
           {[
-            { label: 'Running', count: running, variant: 'warning' as const },
-            { label: 'Pending', count: pending, variant: 'muted' as const },
-            { label: 'Completed', count: completed, variant: 'success' as const },
-            { label: 'Failed', count: failed, variant: 'error' as const },
+            { label: t('status.running'), count: running, variant: 'warning' as const },
+            { label: t('status.pending'), count: pending, variant: 'muted' as const },
+            { label: t('status.completed'), count: completed, variant: 'success' as const },
+            { label: t('status.failed'), count: failed, variant: 'error' as const },
           ].map((stat) => (
             <Badge key={stat.label} variant={stat.variant}>
               <span className="tabular-nums font-semibold">{stat.count}</span> {stat.label}
@@ -112,12 +113,12 @@ export default function JobsPage() {
         </div>
 
         {isLoading ? (
-          <p className="text-sm text-text-muted">Loading jobs…</p>
+          <p className="text-sm text-text-muted">Carregando tarefas…</p>
         ) : display.length === 0 ? (
           <EmptyState
             icon={<Cpu className="w-7 h-7" />}
-            title="No jobs yet"
-            description="Upload content to trigger processing jobs."
+            title={t('jobs.noJobs')}
+            description={t('jobs.noJobsDesc')}
           />
         ) : (
           <div className="space-y-3">

@@ -6,6 +6,7 @@ import { AlignLeft, Sparkles, Plus, GripVertical, ChevronRight, Loader2, Check }
 import { TopBar } from '@/components/layout/TopBar'
 import { useOutline, useGenerateOutline, useSlides } from '@/lib/api/hooks'
 import { Button, EmptyState } from '@slideforge/ui'
+import { t } from '@/lib/i18n'
 import type { OutlineSection } from '@/lib/api/types'
 
 function SectionCard({ section, index, slides }: { section: OutlineSection; index: number; slides: { id: string; title?: string; bgColor?: string }[] }) {
@@ -73,7 +74,7 @@ export default function OutlinePage() {
               disabled={generate.isPending}
               leftIcon={generate.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
             >
-              {generate.isPending ? 'Generating…' : 'AI Generate'}
+              {generate.isPending ? t('outline.generating') : t('outline.generate')}
             </Button>
           </div>
         }
@@ -82,21 +83,21 @@ export default function OutlinePage() {
         <div className="mb-6">
           <div className="flex items-center gap-2.5 mb-2">
             <AlignLeft className="w-5 h-5 text-accent" />
-            <h1 className="font-display text-2xl text-text">Narrative Outline</h1>
+            <h1 className="font-display text-2xl text-text">{t('outline.title')}</h1>
           </div>
-          <p className="text-text-muted text-sm">Structure your story arc. Drag sections to reorder.</p>
+          <p className="text-text-muted text-sm">Estruture o arco da sua narrativa. Arraste seções para reordenar.</p>
         </div>
 
         {isLoading ? (
-          <p className="text-sm text-text-muted">Loading outline…</p>
+          <p className="text-sm text-text-muted">Carregando roteiro…</p>
         ) : display.sections.length === 0 ? (
           <EmptyState
             icon={<AlignLeft className="w-7 h-7" />}
-            title="No outline yet"
-            description="Save a briefing first, then generate an AI outline."
+            title={t('outline.noOutline')}
+            description={t('outline.noOutlineDesc')}
             action={
               <Button variant="primary" onClick={() => generate.mutate()} loading={generate.isPending} leftIcon={<Sparkles className="w-4 h-4" />}>
-                Generate Outline
+                {t('outline.generate')}
               </Button>
             }
           />
@@ -109,7 +110,7 @@ export default function OutlinePage() {
               ))}
             <button className="w-full flex items-center justify-center gap-2 py-3 border border-dashed border-border rounded-xl text-sm text-text-muted hover:text-text hover:border-border-strong transition-colors">
               <Plus className="w-4 h-4" />
-              Add Section
+              Adicionar seção
             </button>
           </div>
         )}

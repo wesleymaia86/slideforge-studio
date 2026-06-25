@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     default: 'SlideForge Studio',
     template: '%s · SlideForge Studio',
   },
-  description: 'AI-powered presentation intelligence platform',
+  description: 'Plataforma de inteligência para apresentações com IA',
   icons: {
     icon: '/favicon.svg',
   },
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="pt-BR" className="dark" suppressHydrationWarning>
       <body
         className={`${instrumentSerif.variable} ${dmSans.variable} ${dmMono.variable} font-body bg-bg text-text antialiased grain`}
       >

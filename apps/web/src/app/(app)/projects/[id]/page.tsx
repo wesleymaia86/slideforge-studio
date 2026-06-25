@@ -4,15 +4,8 @@ import { useParams, useRouter } from 'next/navigation'
 import { ArrowRight, Upload, Cpu, BarChart3, FileText, AlignLeft, Presentation, Download, Clock, Edit2 } from 'lucide-react'
 import { TopBar } from '@/components/layout/TopBar'
 import { useProject, useJobs } from '@/lib/api/hooks'
+import { t } from '@/lib/i18n'
 import { Skeleton, EmptyState } from '@slideforge/ui'
-
-interface QuickAction {
-  label: string
-  description: string
-  icon: React.ReactNode
-  href: string
-  accent?: boolean
-}
 
 export default function ProjectDetailPage() {
   const { id } = (useParams<{ id: string }>() ?? { id: '' })
@@ -20,21 +13,21 @@ export default function ProjectDetailPage() {
   const { data: project, isLoading } = useProject(id)
   const { data: jobs } = useJobs(id)
 
-  const quickActions: QuickAction[] = [
-    { label: 'Upload Content', description: 'Add slides, docs, or recordings', icon: <Upload className="w-5 h-5" />, href: `/projects/${id}/upload` },
-    { label: 'Processing Jobs', description: 'Monitor AI processing status', icon: <Cpu className="w-5 h-5" />, href: `/projects/${id}/jobs` },
-    { label: 'Insights', description: 'AI analysis of your content', icon: <BarChart3 className="w-5 h-5" />, href: `/projects/${id}/insights` },
-    { label: 'Briefing', description: 'Set goals, audience, and tone', icon: <FileText className="w-5 h-5" />, href: `/projects/${id}/briefing` },
-    { label: 'Outline', description: 'Structure your narrative arc', icon: <AlignLeft className="w-5 h-5" />, href: `/projects/${id}/outline` },
-    { label: 'Editor', description: 'Build and preview your deck', icon: <Presentation className="w-5 h-5" />, href: `/projects/${id}/editor`, accent: true },
-    { label: 'Exports', description: 'Download PPTX, PDF, or HTML', icon: <Download className="w-5 h-5" />, href: `/projects/${id}/exports` },
+  const quickActions = [
+    { label: t('projects.uploadContent'), description: t('projects.uploadContentDesc'), icon: <Upload className="w-5 h-5" />, href: `/projects/${id}/upload` },
+    { label: t('projects.processingJobs'), description: t('projects.processingJobsDesc'), icon: <Cpu className="w-5 h-5" />, href: `/projects/${id}/jobs` },
+    { label: t('nav.insights'), description: t('projects.insightsDesc'), icon: <BarChart3 className="w-5 h-5" />, href: `/projects/${id}/insights` },
+    { label: t('nav.briefing'), description: t('projects.briefingDesc'), icon: <FileText className="w-5 h-5" />, href: `/projects/${id}/briefing` },
+    { label: t('nav.outline'), description: t('projects.outlineDesc'), icon: <AlignLeft className="w-5 h-5" />, href: `/projects/${id}/outline` },
+    { label: t('nav.editor'), description: t('projects.editorDesc'), icon: <Presentation className="w-5 h-5" />, href: `/projects/${id}/editor`, accent: true },
+    { label: t('nav.exports'), description: t('projects.exportsDesc'), icon: <Download className="w-5 h-5" />, href: `/projects/${id}/exports` },
   ]
 
   const statusMap = {
-    ready: { label: 'Ready', dot: 'bg-success' },
-    processing: { label: 'Processing', dot: 'bg-warning animate-pulse-amber' },
-    draft: { label: 'Draft', dot: 'bg-text-faint' },
-    error: { label: 'Error', dot: 'bg-error' },
+    ready: { label: t('status.ready'), dot: 'bg-success' },
+    processing: { label: t('status.processing'), dot: 'bg-warning animate-pulse-amber' },
+    draft: { label: t('status.draft'), dot: 'bg-text-faint' },
+    error: { label: t('status.error'), dot: 'bg-error' },
   }
 
   if (isLoading) {
@@ -49,9 +42,9 @@ export default function ProjectDetailPage() {
   if (!project) {
     return (
       <EmptyState
-        title="Project not found"
-        description="This project may have been deleted or you may not have access."
-        action={<button onClick={() => router.push('/projects')} className="text-accent text-sm">Back to projects</button>}
+        title={t('projects.notFoundTitle')}
+        description={t('projects.notFoundDesc')}
+        action={<button onClick={() => router.push('/projects')} className="text-accent text-sm">{t('projects.backToProjects')}</button>}
       />
     )
   }
@@ -75,21 +68,22 @@ export default function ProjectDetailPage() {
             </div>
             <button className="flex items-center gap-2 h-8 px-3 border border-border rounded-lg text-xs text-text-muted hover:text-text hover:bg-surface-2 transition-colors shrink-0">
               <Edit2 className="w-3.5 h-3.5" />
-              Edit
+              {t('projects.edit')}
             </button>
           </div>
 
           <div className="flex items-center gap-6 mt-4 text-xs text-text-faint">
-            <span>{project.slideCount} slides</span>
+            <span>{project.slideCount} {t('common.slides')}</span>
             <span className="flex items-center gap-1">
               <Clock className="w-3.5 h-3.5" />
-              Updated {new Date(project.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+              {t('projects.updatedAt')}{' '}
+              {new Date(project.updatedAt).toLocaleDateString('pt-BR', { month: 'short', day: 'numeric', year: 'numeric' })}
             </span>
           </div>
         </div>
 
         <div className="mb-8">
-          <h2 className="text-sm font-semibold text-text mb-4">Project Tools</h2>
+          <h2 className="text-sm font-semibold text-text mb-4">{t('projects.projectTools')}</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             {quickActions.map((action) => (
               <button
@@ -114,12 +108,12 @@ export default function ProjectDetailPage() {
         {displayJobs.length > 0 && (
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-text">Recent Jobs</h2>
+              <h2 className="text-sm font-semibold text-text">{t('projects.recentJobs')}</h2>
               <button
                 onClick={() => router.push(`/projects/${id}/jobs`)}
                 className="text-xs text-text-muted hover:text-accent transition-colors flex items-center gap-1"
               >
-                View all <ArrowRight className="w-3 h-3" />
+                {t('common.viewAll')} <ArrowRight className="w-3 h-3" />
               </button>
             </div>
             <div className="space-y-2">

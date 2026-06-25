@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { LoggerModule } from 'nestjs-pino';
 import { BullModule } from '@nestjs/bull';
 import { validateEnv } from '@slideforge/config';
 import { PrismaModule } from './infra/database/prisma.module';
+import { AiModule } from './infra/ai/ai.module';
 import { AuthModule } from './interfaces/http/auth/auth.module';
 import { WorkspaceModule } from './interfaces/http/workspace/workspace.module';
 import { ProjectModule } from './interfaces/http/project/project.module';
@@ -48,6 +49,7 @@ import { JwtAuthGuard } from './interfaces/http/auth/guards/jwt-auth.guard';
     }),
 
     PrismaModule,
+    AiModule,
     AuthModule,
     WorkspaceModule,
     ProjectModule,

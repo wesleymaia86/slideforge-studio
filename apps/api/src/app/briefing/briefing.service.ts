@@ -5,11 +5,10 @@ import type { BriefingInput } from '@slideforge/types';
 
 @Injectable()
 export class BriefingService {
-  private readonly ai: AiClient;
-
-  constructor(private readonly prisma: PrismaService) {
-    this.ai = new AiClient();
-  }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly ai: AiClient,
+  ) {}
 
   async createBriefing(deckId: string, input: BriefingInput) {
     return this.prisma.briefing.create({
