@@ -13,7 +13,7 @@ const ReactQueryDevtools = dynamic(
 
 function handleGlobalError(error: unknown) {
   if (error instanceof ApiError && error.status === 401) {
-    signOut({ redirectTo: '/login' })
+    signOut()
   }
 }
 

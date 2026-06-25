@@ -1,7 +1,6 @@
 import NextAuth from 'next-auth'
 import type { NextAuthConfig } from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
-import { BASE_URL } from '@/lib/api/client'
 
 declare module 'next-auth' {
   interface Session {
@@ -38,8 +37,16 @@ const config: NextAuthConfig = {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null
 
+        // Use API_URL (internal container URL) for server-side calls.
+        // NEXT_PUBLIC_API_URL is embedded at build time for browser use — not reliable here.
+        const serverApiBase = (
+          process.env.API_URL ??
+          process.env.NEXT_PUBLIC_API_URL ??
+          'http://localhost:3001'
+        ).replace(/\/$/, '')
+
         try {
-          const res = await fetch(`${BASE_URL}/auth/login`, {
+          const res = await fetch(`${serverApiBase}/api/v1/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

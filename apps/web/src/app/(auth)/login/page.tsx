@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import { Eye, EyeOff, ArrowRight, Layers } from 'lucide-react'
 import { BASE_URL } from '@/lib/api/client'
@@ -16,6 +17,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const router = useRouter()
 
   function resetForm() {
     setName('')
@@ -36,21 +38,20 @@ export default function LoginPage() {
     setError('')
 
     try {
-      await signIn('credentials', {
+      const result = await signIn('credentials', {
         email,
         password,
-        redirectTo: '/dashboard',
+        redirect: false,
       })
-    } catch (err: unknown) {
-      setLoading(false)
-      const isRedirect =
-        err &&
-        typeof err === 'object' &&
-        'digest' in err &&
-        String((err as { digest?: string }).digest).includes('NEXT_REDIRECT')
-      if (!isRedirect) {
+      if (!result || result.error) {
         setError('E-mail ou senha inválidos.')
+        setLoading(false)
+      } else {
+        router.push('/dashboard')
       }
+    } catch {
+      setError('Não foi possível conectar ao servidor.')
+      setLoading(false)
     }
   }
 
@@ -76,8 +77,13 @@ export default function LoginPage() {
       }
 
       setSuccess('Conta criada! Entrando…')
-      // Auto-login after register
-      await signIn('credentials', { email, password, redirectTo: '/dashboard' })
+      const result = await signIn('credentials', { email, password, redirect: false })
+      if (!result || result.error) {
+        setError('Conta criada, mas o login automático falhou. Tente entrar manualmente.')
+        setLoading(false)
+      } else {
+        router.push('/dashboard')
+      }
     } catch {
       setError('Não foi possível conectar ao servidor.')
       setLoading(false)
@@ -85,6 +91,7 @@ export default function LoginPage() {
   }
 
   const isLogin = mode === 'login'
+
 
   return (
     <div className="min-h-screen bg-bg flex">
