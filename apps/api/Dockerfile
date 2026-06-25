@@ -12,6 +12,8 @@ RUN pnpm install --frozen-lockfile
 RUN pnpm exec prisma generate --schema=prisma/schema.prisma
 RUN pnpm --filter @slideforge/api... build
 RUN pnpm deploy --filter @slideforge/api --prod /prod/api
+RUN cp -r /app/apps/api/dist /prod/api/dist && \
+    cp -r /app/node_modules/.pnpm/@prisma+client@*/node_modules/.prisma /prod/api/node_modules/.prisma
 
 FROM node:20-alpine AS runner
 WORKDIR /app
@@ -23,7 +25,6 @@ RUN apk add --no-cache openssl curl && \
     adduser --system --uid 1001 nestjs
 
 COPY --from=builder /prod/api ./
-COPY --from=builder /app/apps/api/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 
 USER nestjs
