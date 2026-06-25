@@ -12,7 +12,10 @@ ARG NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_APP_ENV=production
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_APP_ENV=$NEXT_PUBLIC_APP_ENV
+# Coolify may pass NODE_ENV=production at build-time; devDeps (tailwindcss, etc.) are required.
+ENV NODE_ENV=development
 RUN pnpm install --frozen-lockfile
+RUN pnpm --filter @slideforge/types build && pnpm --filter @slideforge/config build
 RUN pnpm --filter @slideforge/web build
 
 FROM node:20-alpine AS runner
