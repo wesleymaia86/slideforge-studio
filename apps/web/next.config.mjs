@@ -6,7 +6,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
-  outputFileTracingRoot: path.join(__dirname, '../../'),
   transpilePackages: ['@slideforge/ui'],
   images: {
     remotePatterns: [
@@ -14,6 +13,7 @@ const nextConfig = {
     ],
   },
   experimental: {
+    outputFileTracingRoot: path.join(__dirname, '../../'),
     optimizePackageImports: ['lucide-react'],
   },
 }
