@@ -11,8 +11,9 @@ AI-powered presentation builder. Monorepo with NestJS API, Next.js web, and Pyth
 | `d16cfd4` | feat(api): JWT auth guards, service hardening, security docs |
 | `e09c9ab` | feat(db): Prisma schema, initial migration, worker config |
 | `f1ed101` | feat(web): Next.js UI wired to API, shared UI components |
+| `f559af4` | docs: delivery checklist, migration steps, Coolify blocker notes |
 
-Remote: https://github.com/wesleymaia86/slideforge-studio (`main` @ `f1ed101`)
+Remote: https://github.com/wesleymaia86/slideforge-studio (`main` @ `f559af4`)
 
 ### Functional vs stubbed
 
