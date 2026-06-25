@@ -46,18 +46,18 @@ export default function InsightsPage() {
         <div className="mb-6">
           <div className="flex items-center gap-2.5 mb-2">
             <Sparkles className="w-5 h-5 text-accent" />
-            <h1 className="font-display text-2xl text-text">AI Insights</h1>
+            <h1 className="font-display text-2xl text-text">{t('insights.title')}</h1>
           </div>
-          <p className="text-text-muted text-sm">Machine-generated analysis of your presentation content.</p>
+          <p className="text-text-muted text-sm">Análise gerada por IA do conteúdo da sua apresentação.</p>
         </div>
 
         {isLoading ? (
-          <p className="text-sm text-text-muted">Loading insights…</p>
+          <p className="text-sm text-text-muted">Carregando insights…</p>
         ) : display.length === 0 ? (
           <EmptyState
             icon={<BarChart3 className="w-7 h-7" />}
-            title="No insights yet"
-            description="Upload and process content to generate AI insights."
+            title={t('insights.noInsights')}
+            description={t('insights.noInsightsDesc')}
           />
         ) : (
           <div className="grid sm:grid-cols-2 gap-4">

@@ -5,14 +5,8 @@ export type AIProvider =
   | "google"
   | "azure-openai";
 
-/** Perfis de agente roteados via OpenRouter (env OPENROUTER_MODEL_*). */
-export type AgentProfile =
-  | "atendimento"
-  | "triagem"
-  | "qualificacao"
-  | "busca_imoveis"
-  | "handoff"
-  | "embedding";
+/** AI task profiles used to select model via OPENROUTER_MODEL env var. */
+export type AgentProfile = "outline" | "insights" | "briefing" | "embedding";
 
 export interface AIModel {
   provider: AIProvider;

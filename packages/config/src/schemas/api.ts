@@ -12,38 +12,13 @@ export const apiEnvSchema = commonEnvSchema.extend({
   JWT_REFRESH_EXPIRY: z.string().default("30d").describe("Refresh token expiry"),
   WORKER_API_KEY: z.string().min(32).describe("Shared secret for worker→API internal callbacks"),
 
-  OPENROUTER_API_KEY: z.string().optional().describe("OpenRouter API key (sk-or-v1-…)"),
-  OPENROUTER_MODEL_ATENDIMENTO: z
+  OPENROUTER_API_KEY: z.string().optional().describe("OpenRouter API key (sk-or-v1-…). Enables AI features when set."),
+  OPENROUTER_MODEL: z
     .string()
     .default("openai/gpt-4o-mini")
-    .describe("Modelo agente atendimento"),
-  OPENROUTER_MODEL_TRIAGEM: z
-    .string()
-    .default("openai/gpt-4o-mini")
-    .describe("Modelo agente triagem / roteiro"),
-  OPENROUTER_MODEL_QUALIFICACAO: z
-    .string()
-    .default("openai/gpt-4o")
-    .describe("Modelo agente qualificação"),
-  OPENROUTER_MODEL_IMOVEIS: z
-    .string()
-    .default("openai/gpt-4o-mini")
-    .describe("Modelo agente busca imóveis"),
-  OPENROUTER_MODEL_HANDOFF: z
-    .string()
-    .default("openai/gpt-4o-mini")
-    .describe("Modelo agente handoff"),
-  OPENROUTER_MODEL_EMBEDDING: z
-    .string()
-    .default("openai/text-embedding-3-small")
-    .describe("Modelo embeddings RAG"),
-  AI_AGENT_ENABLED: z
-    .string()
-    .transform((v) => v === "true")
-    .default("false")
-    .describe("Habilita chamadas LLM via OpenRouter"),
+    .describe("OpenRouter model used for outline/briefing generation (e.g. openai/gpt-4o-mini, anthropic/claude-3.5-sonnet)"),
 
-  OPENAI_API_KEY: z.string().optional().describe("OpenAI API key (legado — preferir OpenRouter)"),
+  OPENAI_API_KEY: z.string().optional().describe("OpenAI API key (direct, optional if using OpenRouter)"),
   ANTHROPIC_API_KEY: z.string().optional().describe("Anthropic API key"),
   GOOGLE_AI_API_KEY: z.string().optional().describe("Google AI (Gemini) API key"),
   AZURE_OPENAI_ENDPOINT: z.string().url().optional().describe("Azure OpenAI endpoint"),

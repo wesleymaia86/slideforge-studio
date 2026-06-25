@@ -19,6 +19,6 @@ export class OpenRouterClientService {
   }
 
   isEnabled(): boolean {
-    return this.config.get<string>("AI_AGENT_ENABLED") === "true" && Boolean(this.getClient());
+    return Boolean(this.getClient());
   }
 }
