@@ -17,7 +17,7 @@ import { UserRepositoryImpl } from '../../../infra/database/repos/user.repositor
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         secret: config.getOrThrow<string>('JWT_SECRET'),
-        signOptions: { expiresIn: config.get<string>('JWT_EXPIRY', '15m') },
+        signOptions: { expiresIn: config.get<string>('JWT_EXPIRY', '30d') },
       }),
     }),
   ],
